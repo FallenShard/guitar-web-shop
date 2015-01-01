@@ -1,0 +1,38 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+
+    <!-- Title, as displayed in the browser tab -->
+    <title>Guitar Shop</title>
+
+    <!-- CSS styles that this page uses, only one though -->
+    <link href="style/style.css" rel="stylesheet" />
+
+    <!-- JS scripts that this page uses, jquery as well as a custom script (guitar-shop.js) -->
+    <script type="text/javascript" src="js/jquery-1.3.2.js"></script>
+    <script type="text/javascript" src="js/jquery.livequery.js"></script>
+
+    <script type="text/javascript" src="js/guitar-shop.js"></script>
+</head>
+<body>
+    <div align="left" style="min-height:800px;">
+        <div id="cart_wrapper" align="center">
+            <form action="#" id="cart_form" name="cart_form">
+                <div class="cart-info"></div>
+                <div class="cart-total">
+                    <b>Total Charges:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b> $<span>0</span>
+                    <input type="hidden" name="total-hidden-charges" id="total-hidden-charges" value="0" />
+                </div>
+                <button type="submit" id="Submit">CheckOut</button>
+            </form>
+        </div>
+        <div id="wrap" align="center">
+            <a id="show_cart" href="javascript:void(0)">View Cart</a>
+            <ul id="wrapul"></ul>
+            <br clear="all" />
+        </div>
+    </div>
+</body>
+</html>
