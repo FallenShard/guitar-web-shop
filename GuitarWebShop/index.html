@@ -8,30 +8,74 @@
     <title>Guitar Shop</title>
 
     <!-- CSS styles that this page uses, only one though -->
-    <link href="style/style.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/bootstrap.css" rel="stylesheet" />
 
     <!-- JS scripts that this page uses, jquery as well as a custom script (guitar-shop.js) -->
     <script type="text/javascript" src="js/jquery-1.3.2.js"></script>
+    <!--<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>-->
     <script type="text/javascript" src="js/jquery.livequery.js"></script>
 
     <script type="text/javascript" src="js/guitar-shop.js"></script>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
 </head>
 <body>
-    <div align="left" style="min-height:800px;">
-        <div id="cart_wrapper" align="center">
-            <form action="#" id="cart_form" name="cart_form">
+    <!--<nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span> 
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Project name</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>-->
+
+    <!---->
+    <div class="container">
+
+        <!-- Reserved for future use -->
+        <div id="nav-bar" class="row">
+        </div>
+
+        <!-- The header of the page, colored dark red -->
+        <div id="header-div" class="row container">
+            <div class="row center-vert padded-row">
+                <button id="view-cart-button" class="col-lg-2 col-lg-offset-10 button-style">VIEW CART</button>
+            </div>
+        </div>
+
+        <!-- Hidden element that shows items in the cart -->
+        <div id="cart_wrapper" class="row container">
+            <form action="#" class ="row" name="cart_form">
                 <div class="cart-info"></div>
                 <div class="cart-total">
                     <b>Total Charges:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b> $<span>0</span>
                     <input type="hidden" name="total-hidden-charges" id="total-hidden-charges" value="0" />
                 </div>
-                <button type="submit" id="Submit">CheckOut</button>
+                <button type="submit" id="Submit" class="button-style">CHECK OUT</button>
             </form>
         </div>
-        <div id="wrap" align="center">
-            <a id="show_cart" href="javascript:void(0)">View Cart</a>
-            <ul id="wrapul"></ul>
-            <br clear="all" />
+
+        <!-- Main div that represents the items and the side-bar -->
+        <div id="content-div" class="row">
+            <div id="side-bar-div" class="col-lg-2" style="background:#00ffff;">
+                Sidebar, clickables and stuff
+            </div>
+
+            <div id="item-div" class="col-lg-10 container">
+            </div>
         </div>
     </div>
 </body>
