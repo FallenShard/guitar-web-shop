@@ -187,3 +187,4 @@ FakesAssemblies/
 # Ignore mongoDB files
 data/
 db/
+res/

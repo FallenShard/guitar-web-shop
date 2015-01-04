@@ -2,53 +2,8 @@
 // This idiom in JavaScript is known as IIFE (Immediately-invoked Function Expression)
 // It prevents pollution of global namespace by placing everything in an anonymous function and evaluates it immediately
 (function () {
-    // this is for 2nd row's li offset from top. It means how much offset you want to give them with animation
-    // This isn't even used in the current code ?!
-    var single_li_offset;
     var currentOpenedBox = -1;
     var Arrays;
-
-    // This callback isn't used anymore, see onItemClick below
-    function OnProductClick(target, e) {
-
-        var thisID = target.attr("id");
-        //var $this = $(this);
-        
-        var id = $('#wrap li').index(target);
-
-        if (current_opened_box == id) // if user click a opened box li again you close the box and return back
-        {
-            $("#wrap .detail-view").slideUp("slow");
-            current_opened_box = -1;
-            return false;
-        }
-        $("#cart_wrapper").slideUp("slow");
-        $("#wrap .detail-view").slideUp("slow");
-
-        // save this id. so if user click a opened box li again you close the box.
-        current_opened_box = id;
-
-        var targetOffset = 0;
-
-        // below conditions assumes that there are four li in one row and total rows are 4. How ever if you want to increase the rows you have to increase else-if conditions and if you want to increase li in one row, then you have to increment all value below. (if(id<=3)), if(id<=7) etc
-
-        if (id <= 3)
-            targetOffset = 0;
-        else if (id <= 7)
-            targetOffset = single_li_offset;
-        else if (id <= 11)
-            targetOffset = single_li_offset * 2;
-        else if (id <= 15)
-            targetOffset = single_li_offset * 3;
-        else if ((id <= 19))
-            targetOffset = single_li_offset * 4;
-
-        $("html:not(:animated),body:not(:animated)").animate({ scrollTop: targetOffset }, 800, function () {
-
-            $('#wrap #detail-' + thisID).slideDown(500);
-            return false;
-        });
-    }
 
     // This is the callback on item click
     function onItemClick(target, e) {
@@ -58,16 +13,16 @@
         // If user clicked an opened item, slide it back
         if (currentOpenedBox === num)
         {
-            $("#details-content-" + currentOpenedBox).slideUp("slow");
+            $("#details-content-" + currentOpenedBox).slideUp("fast");
             currentOpenedBox = -1;
         }
         else
         {
             // Otherwise close the active item, and open a new one
             if (currentOpenedBox !== -1)
-                $("#details-content-" + currentOpenedBox).slideUp("slow");
+                $("#details-content-" + currentOpenedBox).slideUp("fast");
             
-            $("#details-content-" + num).slideDown("slow");
+            $("#details-content-" + num).slideDown("fast");
 
             currentOpenedBox = num;
         }
@@ -116,24 +71,63 @@
         }
     }
 
+    function buildItemView(item, index, itemsPerRow) {
+        var itemDiv = document.createElement("div");
+        $(itemDiv).attr("value", (index + 1));
+        $(itemDiv).attr("id", "item-" + (index + 1));
+        $(itemDiv).attr("class", "col-lg-" + (12 / itemsPerRow) + " item-div");
+
+        // This is the rectangle behind title, the red one at the moment
+        var itemTitleDiv = document.createElement("div");
+        $(itemTitleDiv).attr("class", "item-title-div");
+        $(itemTitleDiv).append(item.name);
+
+        // This is the image of the item, fixed to 150x150
+        var itemImage = document.createElement("img");
+        $(itemImage).attr("src", "res/images/" + item.imageUrl);
+        $(itemImage).attr("alt", "http://placehold.it/150x150");
+
+        // This is the image wrapper and "price" span wrapper
+        var itemImageDiv = document.createElement("div");
+        $(itemImageDiv).attr("class", "item-price-tag");
+        $(itemImageDiv).append(itemImage);
+
+        // This is the "Price: " label
+        var priceTagSpan = document.createElement("span");
+        $(priceTagSpan).append("Price: ");
+        $(itemImageDiv).append(priceTagSpan);
+
+        // This is the footer div with the price
+        var footerDiv = document.createElement("div");
+        $(footerDiv).attr("class", "item-footer-div");
+        $(footerDiv).append("$ " + numberWithCommas(item.price.toFixed(2)));
+
+        // Item composition
+        $(itemDiv).append(itemTitleDiv);
+        $(itemDiv).append(itemImageDiv);
+        $(itemDiv).append(footerDiv);
+
+        return itemDiv;
+    }
+
 
 
     // This is ajax call (more like ajaj, but whatever) towards WCF
     function getProductList(page) {
         $.ajax({
-                    type: "GET",                        // GET or POST or PUT or DELETE verb
-                    url: "Service.svc/GetProductList",  // Remote function call for the service
-                    data: '{"page":' + page + '}',      // Data sent to server
-                    contentType: "application/json; charset=utf-8", // Content type is JSON
-                    dataType: "json",                   // Expected data format from server
-                    processdata: true,                  // True or False
-                    success: function (msg) {           // Callback for successful ajax call
-                        onProductListSuccess(msg);
-                    },
-                    error: function () {                // Callback if ajax fails
-                        alert("Error loading products" + result.status + " " + result.statusText);
-                    }
-               });
+            type: "GET",                        // GET or POST or PUT or DELETE verb
+            url: "Service.svc/GetProductList",  // Remote function call for the service
+            data: '{"page":' + page + '}',      // Data sent to server
+            contentType: "application/json; charset=utf-8", // Content type is JSON
+            dataType: "json",                   // Expected data format from server
+            processdata: true,                  // True or False
+            success: function (msg) {           // Callback for successful ajax call
+                onProductListSuccess(msg);
+            },
+            error: function () {                // Callback if ajax fails
+                alert("Error loading products" + result.status + " " + result.statusText);
+            }
+        });
     }
 
 
@@ -142,8 +136,9 @@
         var itemList = document.getElementById("item-div");
         var sidebar = document.getElementById("side-bar-div");
         var rowDiv;
+        var itemsPerRow = 4;
 
-        for (var i = 0; i < result.length; i++) {
+        for (var i = 0; i < Math.min(result.length, 12); i++) {
 
             // Attempt JSON parse, equivalent to eval
             try {
@@ -154,56 +149,58 @@
             }
 
             // On every Nth (4th here) item, create a row-fluid div and add to itemList
-            if (i % 4 == 0) {
+            if (i % itemsPerRow === 0) {
                 rowDiv = document.createElement("div");
                 $(rowDiv).attr("class", "row-fluid");
                 $(itemList).append(rowDiv);
             }
 
-            // Create the parent div for item first, it's a col-3
-            var itemDiv = document.createElement("div");
-            $(itemDiv).attr("value", (i + 1));
-            $(itemDiv).attr("id", "item-" + (i + 1));
-            $(itemDiv).attr("class", "col-lg-3 item-div");
-
-            // This is the rectangle behind title, the red one at the moment
-            var itemTitleDiv = document.createElement("div");
-            $(itemTitleDiv).attr("class", "item-title-div");
-
-            // This is the title text in a <span></span> element
-            var itemTitle = document.createElement("span");
-            $(itemTitle).append(item.name);
-            $(itemTitleDiv).append(itemTitle);
-            $(itemDiv).append(itemTitleDiv);
-
-            // This is the image of the item, fixed to 125x125
-            var itemImage = document.createElement("img");
-            $(itemImage).attr("src", "product_img/" + item.imageURL);
-            $(itemImage).attr("height", 125);
-            $(itemImage).attr("width", 125);
-            $(itemImage).attr("alt", "http://placehold.it/175x175");
-            $(itemImage).attr("class", "item-image");
-
-            // Image wrapper is used to position image properly, albeit it's not working as great atm
-            var itemImageWrapper = document.createElement("div");
-            $(itemImageWrapper).attr("class", "item-image-wrapper");
-            $(itemImageWrapper).append(itemImage);
-            $(itemDiv).append(itemImageWrapper);
+            var itemDiv = buildItemView(item, i, itemsPerRow);
 
             // In the end, just append what we have as itemDiv to the current rowDiv
             $(rowDiv).append(itemDiv);
 
             // This is the details row div, theres a total of n = itemsPerPage of them, all hidden
             var detailsDiv = document.createElement("div");
-            $(detailsDiv).attr("class", "row-fluid test-div");
+            $(detailsDiv).attr("class", "row-fluid");
 
             // This is the content of details div, a single box atm, with a shadow inset
             var detailsContent = document.createElement("div");
             $(detailsContent).attr("id", "details-content-" + (i + 1));
             $(detailsContent).attr("class", "col-lg-12 details-div");
-            $(detailsContent).attr("style", "height: 200px");
+
+            // This is the image of the div
+            var detailsImage = document.createElement("img");
+            $(detailsImage).attr("class", "details-div-image center-vert");
+            $(detailsImage).attr("src", "res/images/" + item.imageUrl);
+
+            // This is green div that will hold the data
+            var detailsDataDiv = document.createElement("div");
+            $(detailsDataDiv).attr("class", "details-data-div");
+            
+            var detailsTitle = document.createElement("div");
+            $(detailsTitle).attr("class", "details-div-title");
+            $(detailsTitle).append(item.name);
+            
+            var attributesDiv = document.createElement("div");
+            $(attributesDiv).attr("class", "details-attr-div");
+            
+            var valuesDiv = document.createElement("div");
+            $(valuesDiv).attr("class", "details-vals-div");
+
+
+            $(detailsDataDiv).append(detailsTitle);
+
+            $(detailsContent).append(detailsImage);
+            $(detailsContent).append(detailsDataDiv);
+            //$(detailsContent).append(detailsTitle);
+
             $(detailsDiv).append(detailsContent);
             $(itemList).append(detailsDiv);
+
+            
+
+
 
             // This is for future use, all tags and search criteria checkboxes,
             // will add more stuff in the future, and probably out of this loop
@@ -350,12 +347,6 @@
     
     // Initialization callback
     var documentInit = function () {
-        // this is for 2nd row's li offset from top. It means how much offset you want to give them with animation
-        // ???????????
-        //single_li_offset = 200;//1000; //200;
-
-        //// Okay, no items are being viewed initially
-        //current_opened_box = -1;
 
         // Array to hold cart item values
         Arrays = new Array();
@@ -421,6 +412,10 @@
         for (var i = 0; i < arr.length; i++) {
             if (arr[i] == obj) return i;
         }
+    }
+
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 })();
 

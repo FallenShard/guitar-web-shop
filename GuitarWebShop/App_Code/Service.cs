@@ -19,12 +19,14 @@ public class Service : IService
         var connectionString = "mongodb://localhost:27017/?safe=true";
 
         // Open the connection towards the server
-        var server = MongoServer.Create(connectionString);
+        //var server = MongoServer.Create(connectionString);
+        var client = new MongoClient(connectionString);
+        var server = client.GetServer();
 
         // Fetch the database named guitar_shop
         var db = server.GetDatabase("guitar_shop");
 
-        var collection = db.GetCollection<BsonDocument>("clothes");
+        var collection = db.GetCollection<BsonDocument>("items");
 
         List<string> products = new List<string>();
 
