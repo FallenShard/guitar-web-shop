@@ -15,11 +15,27 @@ public interface IService
 {
     [OperationContract]
     [WebInvoke(Method         = "GET",
-               ResponseFormat = WebMessageFormat.Json)]
+               ResponseFormat = WebMessageFormat.Json,
+               RequestFormat = WebMessageFormat.Json)]
     string[] GetProductList(int page);
 
     [OperationContract]
     [WebInvoke(Method         = "GET",
                ResponseFormat = WebMessageFormat.Json)]
     string GetProductDetails(string id);
+
+    //[OperationContract]
+    //[WebInvoke(Method         = "GET",
+    //           ResponseFormat = WebMessageFormat.Json)]
+    //string SearchDatabase(string filterChain);
+
+    //[OperationContract]
+    //[WebInvoke(Method         = "POST",
+    //           ResponseFormat = WebMessageFormat.Json)]
+    //string AddItem(string category, string name, string type, string brand, double year, string price, double extra, string[] tags);
+
+    //[OperationContract]
+    //[WebInvoke(Method         = "POST",
+    //           ResponseFormat = WebMessageFormat.Json)]
+    //string RemoveItem(string id);
 }

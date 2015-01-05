@@ -10,7 +10,7 @@ using MongoDB.Bson;
 
 // NOTE: You can use the "Rename" command on the "Refactor" menu 
 // to change the class name "Service" in code, svc and config file together.
-//[AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
+[AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
 public class Service : IService
 {
     public string[] GetProductList(int page)
@@ -35,8 +35,7 @@ public class Service : IService
             products.Add(doc.ToJson());
         }
 
-        return products.ToArray();
-
+        return products.Skip(12 * (page - 1)).Take(12).ToArray();
     }
 
 

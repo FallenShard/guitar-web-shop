@@ -2,8 +2,10 @@
 // This idiom in JavaScript is known as IIFE (Immediately-invoked Function Expression)
 // It prevents pollution of global namespace by placing everything in an anonymous function and evaluates it immediately
 (function () {
+    var itemsPerPage = 12;
     var currentOpenedBox = -1;
     var Arrays;
+    var jsonCache = [];
 
     // This is the callback on item click
     function onItemClick(target, e) {
@@ -71,11 +73,12 @@
         }
     }
 
+    // Builds the view for a single item, with a given JSON, index and itemsPerRow
     function buildItemView(item, index, itemsPerRow) {
         var itemDiv = document.createElement("div");
         $(itemDiv).attr("value", (index + 1));
         $(itemDiv).attr("id", "item-" + (index + 1));
-        $(itemDiv).attr("class", "col-lg-" + (12 / itemsPerRow) + " item-div");
+        $(itemDiv).attr("class", "col-xs-" + (12 / itemsPerRow) + " item-div");
 
         // This is the rectangle behind title, the red one at the moment
         var itemTitleDiv = document.createElement("div");
@@ -110,14 +113,100 @@
         return itemDiv;
     }
 
+    // Builds the view for a single item, with a given JSON
+    function buildDetailsView(item, index)
+    {
+        // This is the details row div, theres a total of n = itemsPerPage of them, all hidden
+        var detailsDiv = document.createElement("div");
+        $(detailsDiv).attr("class", "row-fluid");
 
+        // This is the content of details div, a single box atm, with a shadow inset
+        var detailsContent = document.createElement("div");
+        $(detailsContent).attr("id", "details-content-" + (index + 1));
+        $(detailsContent).attr("class", "col-xs-12 details-div");
+
+        // This is the image of the div
+        var detailsImage = document.createElement("img");
+        $(detailsImage).attr("class", "img-responsive col-xs-4");
+        $(detailsImage).attr("src", "res/images/" + item.imageUrl);
+
+        // This is green div that will hold the data
+        var detailsDataDiv = document.createElement("div");
+        $(detailsDataDiv).attr("class", "col-xs-8");
+
+        var detailsTitle = document.createElement("div");
+        $(detailsTitle).attr("class", "row details-div-title");
+        $(detailsTitle).append(item.name);
+
+        var detailsMiddleRow = document.createElement("div");
+        $(detailsMiddleRow).attr("class", "row");
+
+        var attributesDiv = document.createElement("div");
+        $(attributesDiv).attr("class", "col-xs-3 details-attr-div");
+        $(attributesDiv).append("<h3>type:</h3>");
+        $(attributesDiv).append("<h3>brand:</h3>");
+        $(attributesDiv).append("<h3>year:</h3>");
+        $(attributesDiv).append("<h3>strings:</h3>");
+
+        var attrib = document.createElement("h3");
+        $(attrib).append("type");
+
+        var valuesDiv = document.createElement("div");
+        $(valuesDiv).attr("class", "col-xs-3 details-vals-div");
+        $(valuesDiv).append("<h3>" + item.type + "</h3>");
+        $(valuesDiv).append("<h3>" + item.brand + "</h3>");
+        $(valuesDiv).append("<h3>" + item.year + "</h3>");
+        $(valuesDiv).append("<h3>" + item.strings + "</h3>");
+
+        var brandImg = document.createElement("img");
+        $(brandImg).attr("class", "col-xs-offset-1 col-xs-4");
+        $(brandImg).attr("src", "res/logos/" + item.brandLogoUrl);
+
+        var detailsFooterRow = document.createElement("div");
+        $(detailsFooterRow).attr("class", "row");
+
+        var detailsFooterCol = document.createElement("div");
+        $(detailsFooterCol).attr("class", "col-xs-9 details-footer");
+        $(detailsFooterCol).append("$ " + numberWithCommas(item.price.toFixed(2)));
+
+
+        var buttonCol = document.createElement("div");
+        $(buttonCol).attr("class", "col-xs-3");
+
+        var addToCartButton = document.createElement("button");
+        $(addToCartButton).attr("class", "btn btn-block btn-add-to-cart");
+        $(addToCartButton).append("Add to Cart");
+        $(buttonCol).append(addToCartButton);
+
+
+        $(detailsFooterRow).append(detailsFooterCol);
+        $(detailsFooterRow).append(buttonCol);
+
+        $(detailsMiddleRow).append(attributesDiv);
+        $(detailsMiddleRow).append(valuesDiv);
+        $(detailsMiddleRow).append(brandImg);
+
+        $(detailsDataDiv).append(detailsTitle);
+        $(detailsDataDiv).append(detailsMiddleRow);
+        $(detailsDataDiv).append(detailsFooterRow);
+
+        $(detailsContent).append(detailsImage);
+        $(detailsContent).append(detailsDataDiv);
+
+        $(detailsDiv).append(detailsContent);
+
+        return detailsDiv;
+    }
 
     // This is ajax call (more like ajaj, but whatever) towards WCF
     function getProductList(page) {
+        
+        var data = { page: page };
+        //data.page = page;
         $.ajax({
             type: "GET",                        // GET or POST or PUT or DELETE verb
             url: "Service.svc/GetProductList",  // Remote function call for the service
-            data: '{"page":' + page + '}',      // Data sent to server
+            data: data,                         // Data sent to server
             contentType: "application/json; charset=utf-8", // Content type is JSON
             dataType: "json",                   // Expected data format from server
             processdata: true,                  // True or False
@@ -133,12 +222,15 @@
 
     // Callback if the service call succeeds
     function onProductListSuccess(result) {
-        var itemList = document.getElementById("item-div");
+        currentOpenedBox = -1;
+        var itemList = document.getElementById("item-content-div");
         var sidebar = document.getElementById("side-bar-div");
         var rowDiv;
         var itemsPerRow = 4;
 
-        for (var i = 0; i < Math.min(result.length, 12); i++) {
+        $(itemList).empty();
+
+        for (var i = 0; i < result.length; i++) {
 
             // Attempt JSON parse, equivalent to eval
             try {
@@ -156,51 +248,13 @@
             }
 
             var itemDiv = buildItemView(item, i, itemsPerRow);
+            var detailsDiv = buildDetailsView(item, i);
 
             // In the end, just append what we have as itemDiv to the current rowDiv
             $(rowDiv).append(itemDiv);
 
-            // This is the details row div, theres a total of n = itemsPerPage of them, all hidden
-            var detailsDiv = document.createElement("div");
-            $(detailsDiv).attr("class", "row-fluid");
-
-            // This is the content of details div, a single box atm, with a shadow inset
-            var detailsContent = document.createElement("div");
-            $(detailsContent).attr("id", "details-content-" + (i + 1));
-            $(detailsContent).attr("class", "col-lg-12 details-div");
-
-            // This is the image of the div
-            var detailsImage = document.createElement("img");
-            $(detailsImage).attr("class", "details-div-image center-vert");
-            $(detailsImage).attr("src", "res/images/" + item.imageUrl);
-
-            // This is green div that will hold the data
-            var detailsDataDiv = document.createElement("div");
-            $(detailsDataDiv).attr("class", "details-data-div");
-            
-            var detailsTitle = document.createElement("div");
-            $(detailsTitle).attr("class", "details-div-title");
-            $(detailsTitle).append(item.name);
-            
-            var attributesDiv = document.createElement("div");
-            $(attributesDiv).attr("class", "details-attr-div");
-            
-            var valuesDiv = document.createElement("div");
-            $(valuesDiv).attr("class", "details-vals-div");
-
-
-            $(detailsDataDiv).append(detailsTitle);
-
-            $(detailsContent).append(detailsImage);
-            $(detailsContent).append(detailsDataDiv);
-            //$(detailsContent).append(detailsTitle);
-
-            $(detailsDiv).append(detailsContent);
+            // Detail div gets appended to the item list, so it appears below
             $(itemList).append(detailsDiv);
-
-            
-
-
 
             // This is for future use, all tags and search criteria checkboxes,
             // will add more stuff in the future, and probably out of this loop
@@ -213,126 +267,14 @@
             $(tagCb).append(tagCbLabel);
             $(tagDiv).append(tagCb);
             $(sidebar).append(tagDiv);
-
-            
-
-            //$()
-
-            //$(productList).append(productItem);
-            //var productItem = document.createElement("li");
-
-            //$(productItem).attr("id", i + 1);
-            ////$(productItem).html(product.name);
-
-            //var productImage = document.createElement("img");
-            //$(productImage).attr("src", "product_img/" + product.imageURL);
-            //$(productImage).attr("class", "items");
-            //$(productImage).attr("height", 100);
-            //$(productImage).attr("alt", "");
-
-
-            //var productBr = document.createElement("br");
-            //$(productBr).attr("clear", "all");
-
-            //var productDiv = document.createElement("div");
-            //$(productDiv).html(product.name);
-            //$(productDiv).attr("id", product._id);
-
-            //$(productItem).append(productImage);
-            //$(productItem).append(productBr);
-            //$(productItem).append(productDiv);
-
-            //var detailView = document.createElement("div");
-            //$(detailView).attr("class", "detail-view");
-            //$(detailView).attr("id", "detail-" + (i + 1).toString());
-
-
-            //var closeX = document.createElement("div");
-            //$(closeX).attr("class", "close");
-            //$(closeX).attr("align", "right");
-
-            //var closeXA = document.createElement("a");
-            //$(closeXA).html("x");
-            //$(closeXA).attr("href", "javascript:void(0)");
-            //$(closeX).append(closeXA);
-
-            //var productImage = document.createElement("img");
-            //$(productImage).attr("src", "product_img/" + product.imageURL);
-            //$(productImage).attr("class", "detail_images");
-            //$(productImage).attr("width", 340);
-            //$(productImage).attr("height", 310);
-            //$(productImage).attr("alt", "");
-
-            //var detailInfo = document.createElement("div");
-            //$(detailInfo).attr("class", "detail_info");
-
-            //var itemName = document.createElement("label");
-            //$(itemName).attr("class", "item_name");
-            //$(itemName).html(product.name);
-
-            //var productBr = document.createElement("br");
-            //$(productBr).attr("clear", "all");
-
-            //var desc = "";
-            //for (var j = 0; j < product.tags.length - 1; j++) {
-            //    desc = desc + product.tags[j] + ", ";
-            //}
-            //desc = desc + product.tags[product.tags.length - 1];
-
-
-            //var productDesc = document.createElement("p");
-            //$(productDesc).html(desc);
-
-            //var productBr1 = document.createElement("br");
-            //$(productBr1).attr("clear", "all");
-
-            //var productBr2 = document.createElement("br");
-            //$(productBr2).attr("clear", "all");
-
-            //var productSpan = document.createElement("span");
-            //$(productSpan).attr("class", "price");
-            //$(productSpan).html(product.price);
-
-            //$(productDesc).append(productBr1);
-            //$(productDesc).append(productBr2);
-            //$(productDesc).append(productSpan);
-
-            //var productBr3 = document.createElement("br");
-            //$(productBr3).attr("clear", "all");
-
-            //var productButton = document.createElement("button");
-            //$(productButton).attr("class", "add-to-cart-button");
-            //$(productButton).html("Add to Cart");
-
-            //$(detailInfo).append(itemName);
-            //$(detailInfo).append(productBr);
-            //$(detailInfo).append(productDesc);
-            //$(detailInfo).append(productBr3);
-            //$(detailInfo).append(productButton);
-
-            //$(detailView).append(closeX);
-            //$(detailView).append(productImage);
-            //$(detailView).append(detailInfo);
-
-            ////$(detailView).insertAfter(target);
-
-
-            ////adding products to list
-            //if ((i % 4) == 0) {
-            //    $(productList).append(productItem);
-            //    $(productList).append(detailView);
-            //}
-            //else {
-            //    $(productItem).insertAfter(prevProductItem);
-            //    $(detailView).insertAfter(prevDetailView);
-            //}
-            //prevProductItem = $(productItem);
-            //prevDetailView = $(detailView);
-
         }
 
         $(".item-div").click(function (event) {
             onItemClick($(this), event);
+        });
+
+        $(".btn-add-to-cart").click(function (event) {
+            alert("Hooray!");
         });
 
         $(".add-to-cart-button").click(function () {
@@ -352,7 +294,7 @@
         Arrays = new Array();
 
         // Initiate ajax request to get the data from the server
-        getProductList(0);
+        getProductList(1);
 
         // I'm not sure what this crap does, will check out later
         $('.remove').livequery('click', function () {
@@ -394,6 +336,13 @@
             $('#cart_wrapper').slideToggle({ duration: 300, easing: 'swing' });
             //$('#content-div').slideToggle({ duration: 700, easing: 'swing' });
         });
+
+        for (var i = 1; i < 5; i++)
+        {
+            $('#page-' + i).click(
+                pageClick(i)
+            );
+        }
     }
 
     // Since the document is not instantly ready for manipulation, jQuery can detect that
@@ -417,5 +366,12 @@
     function numberWithCommas(x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+
+    // Closure for pagination
+    var pageClick = function (i) {
+        return function () {
+            getProductList(i);
+        };
+    };
 })();
 
