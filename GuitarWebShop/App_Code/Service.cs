@@ -27,15 +27,16 @@ public class Service : IService
         var db = server.GetDatabase("guitar_shop");
 
         var collection = db.GetCollection<BsonDocument>("items");
+        var bsons = collection.FindAll().Skip(12 * (page - 1)).Take(12);
 
         List<string> products = new List<string>();
 
-        foreach (BsonDocument doc in collection.FindAll())
+        foreach (BsonDocument doc in bsons)
         {
             products.Add(doc.ToJson());
         }
 
-        return products.Skip(12 * (page - 1)).Take(12).ToArray();
+        return products.ToArray();
     }
 
 

@@ -25,13 +25,23 @@
     font-size: 42px;
 }
 
+.title-font {
+    font-family: 'Changa One', cursive;
+}
+
 /* THIS IS DEBUG ONLY, "*" applies global style to elements */
 /** {
     border: 1px solid blue;
 }*/
 
-.padded-row {
-    padding: 15px;
+.padded-vert {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+.margin-vert {
+    margin-bottom: 2px;
+    margin-top: 2px;
 }
 
 .center-vert {
@@ -45,34 +55,53 @@
     margin: 0 auto;
 }
 
-.btn {
+.btn-skin {
     background: #CC9933;
     border: 2px solid #000000;
     font-family: 'Open Sans', sans-serif;
     text-transform: uppercase;
 }
 
-.btn:focus { 
+.btn-skin:focus { 
     outline: none;
 }
 
-.btn:hover {
+.btn-skin:hover {
     background: #EEAA44;
 }
 
-.btn:active {
+.btn-skin:active {
     background: #AA7711;
 }
 
-#cart_wrapper { 
-    border: solid #CC9933 2px; 
-    display: none;
+.small-border {
+    border: 1px solid #000000;
+}
+
+.btn-skin-important {
+    background: #FF0000;
+    border: 2px solid #000000;
     font-family: 'Open Sans', sans-serif;
+    text-transform: uppercase;
+    color: white;
+}
+
+.btn-skin-important:focus { 
+    outline: none;
+}
+
+.btn-skin-important:hover {
+    background: #FF8080;
+}
+
+.btn-skin-important:active {
+    background: #800000;
 }
 
 .item-div {
     height: 250px;
-    box-shadow: inset 0 -7px 9px -7px rgba(0,0,0,0.4);
+    cursor: pointer;
+    /*box-shadow: inset 0 -7px 9px -7px rgba(0,0,0,0.4);*/
 }
 
 .item-title-div {
@@ -83,11 +112,13 @@
     padding-left: 5px;
     padding-top: 5px;
     font-family: 'Open Sans', sans-serif;
+    box-shadow: 0 8px 5px -6px black;
 }
 
 .item-div img {
     width: 150px;
     height: 150px;
+    padding: 5px;
 }
 
 .item-price-tag span {
@@ -108,7 +139,6 @@
 
 .details-div {
     display: none;
-    /*height: 300px;*/
     box-shadow: inset 0 0 10px #000000;
     padding: 5px;
 }
@@ -155,163 +185,33 @@
     text-align: right;
 }
 
-
-
-
-
-/*#wrap .detail-view
-{
-    border: 1px solid #E2E2E2;
-    border-top: 1px solid #E2E2E2;
-    left: 0;
-    height:380px;
-    overflow: hidden;
-    clear:both;
-    display:none;
-    margin-left:13px;
-    margin-bottom:15px;
-    width: 96%;
-}*/
-
-#wrap .detail-view .close{ text-align:right; width:98%; margin:5px; }
-#wrap .close a{ padding:6px; height:10px; width:20px; color:#525049; }
-#wrap .detail-view .detail_images{ float:left}
-
-#wrap .detail-view .detail_info{ 
-    float:right;
-    font-family: "Helvetica Neue",Helvetica,"Nimbus Sans L",Arial,sans-serif; 
-    color:#525049;
-    margin-right:20px;
-    margin-top:30px;
-    text-align:justify;
-    width:250px;
-    font-size:12px;
+.modal-dialog {
+    width: 700px;
 }
 
-#wrap .detail-view .detail_info label{ font-size:12px;text-transform:uppercase; letter-spacing:1px; line-height:60px;} 
-
-#wrap .detail-view .detail_info p{ height:110px;}
-
-a#show_cart{
-    background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #E8E7DC;
-    cursor: pointer;
-    display:block;
-    display: inline-block;
-    font: 9px/21px "Helvetica Neue",Helvetica,"Nimbus Sans L",Arial,sans-serif;
-    letter-spacing: 2px;
-    color:#525049;
-    padding:8px;
-    text-decoration:none;
-    
-    text-transform: uppercase;
-}
-.add-to-cart-button{
-    background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #E8E7DC;
-    cursor: pointer;
-    display: inline-block;
-    font: 9px/21px "Helvetica Neue",Helvetica,"Nimbus Sans L",Arial,sans-serif;
-    letter-spacing: 2px;
-    padding-top: 10px;color:#525049;
-    margin-top:15px;
-    text-transform: uppercase;
+.modal-body {
+    font-family: 'Open Sans', sans-serif;
 }
 
-.add-to-cart-button:hover {
-    background: none repeat scroll 0 0 #F8F8F3;
+.modal-footer-adj {
+    height: 40px;
 }
 
-.shopp{background: none repeat scroll 0 0 #F8F8F3;}
-
-#wrap ul li{
- 
-    list-style-type:none; 
-    height:146px; 
-    width:160px; 
-    margin-left:10px; 
-    margin-bottom:15px; 
-    float:left;
-    padding:15px 0px 0px 0px;
-    font-family:"LubalGraphBdBTBold",Tahoma;
-    font-size:2em;
-    border:solid #fff 1px; 
-    overflow:hidden;
+#total-price {
+    font-family: 'Changa One', cursive;
+    color: red;
+    font-size: 2em;
 }
 
-.footer{ height:400px; background:#E2E2E2} 
-
-#wrap ul li:hover{ border:solid #f3f4ee 1px; }
-
-#wrap ul li div{ 
-
-    height:31px;
-    text-align:center;
-    width:160px;
-    margin-top:10px;
-    position:relative;
-    bottom:0px;
-    padding-top:6px;
-    padding-bottom:4px;
-    background:#f3f4ee ;
-    font: 12px/21px "Helvetica Neue",Helvetica,"Nimbus Sans L",Arial,sans-serif;
-    opacity:0.8;
-    color: #525049 ;
-    text-shadow: 0px 2px 3px #555;
+.pagination li a {
+    color: #990000;
 }
 
-img#cart{bottom:0px;position:fixed; margin-left:30px; }
 
-#wrap ul li { cursor:pointer;}
-
-
-
-
-#Submit {
-  float:right;
+.pagination li a:hover {
+    color: #FF0000;
 }
 
-.closeCart{ cursor:pointer;}
-
-/*button {
-    background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #E8E7DC;
-    width:140px;
-    cursor: pointer;
-    display: inline-block;
-    font: 9px/21px "Helvetica Neue",Helvetica,"Nimbus Sans L",Arial,sans-serif;
-    letter-spacing: 2px;
-    padding-top: 12px;color:#525049;
-    margin-top:1px;
-    border:solid #ccc 1px; padding:8px; 
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    margin-left:20px;
-    text-transform: uppercase;
-}*/
-
-button:hover {
-    background: none repeat scroll 0 0 #F8F8F3;
+.pagination li a:focus {
+    color: #FF0000;
 }
-
-.cart-total{background: none repeat scroll 0 0 #F8F8F3;}
-
-.shopp,.cart-total{ 
-    border:solid #E8E7DC 1px; padding:8px; 
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px; font-size:12px;
-    background:url(remove.png) center right no-repeat 5px;
-    border-radius: 8px; 
-    font-family:"LubalGraphBdBTBold",Tahoma; 
-    margin-top:3px;
-    width:320px;
-    float:left;
-    }
-
-div.shopp span{ float:left;}	
-div.shopp div.label{ width:130px; float:left; }		
-div.shopp div.shopp-price{ width:70px; float:left;}
-.quantity{ float:left; margin-top:-3px; width:20px;}
-
-img.remove{float:right;cursor:pointer;}
-.cart-total b{width:130px;}

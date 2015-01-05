@@ -11,12 +11,7 @@
     <link href="css/bootstrap.css" rel="stylesheet" />
     <link href="css/style.css" rel="stylesheet" />
 
-    <!-- JS scripts that this page uses, jquery as well as a custom script (guitar-shop.js) -->
-    <script type="text/javascript" src="js/jquery-1.3.2.js"></script>
-    <!--<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>-->
-    <script type="text/javascript" src="js/jquery.livequery.js"></script>
-
-    <script type="text/javascript" src="js/guitar-shop.js"></script>
+    
 
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
     <link href='http://fonts.googleapis.com/css?family=Changa+One' rel='stylesheet' type='text/css' />
@@ -39,20 +34,12 @@
                 <h1 id="logo-1" class="logo">GUITAR<span id="logo-2" class="logo">LOUNGE</span></h1>
             </div>
             <div class="col-xs-2 col-xs-offset-3 center-vert">
-                <button id="view-cart-button" class="button-style btn btn-block">VIEW CART</button>
+                <button id="view-cart-button" class="btn btn-block btn-skin"
+                        data-toggle="modal"
+                        href="#myModal">
+                    VIEW CART
+                </button>
             </div>
-        </div>
-
-        <!-- Hidden element that shows items in the cart -->
-        <div id="cart_wrapper" class="row container">
-            <form action="#" class ="row" name="cart_form">
-                <div class="cart-info"></div>
-                <div class="cart-total">
-                    <b>Total Charges:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b> $<span>0</span>
-                    <input type="hidden" name="total-hidden-charges" id="total-hidden-charges" value="0" />
-                </div>
-                <button type="submit" id="Submit" class="button-style">CHECK OUT</button>
-            </form>
         </div>
 
         <!-- Main div that represents the items and the side-bar -->
@@ -80,5 +67,37 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal for the cart -->
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title title-font">Your Cart</h4>
+                </div>
+                <div id="modal-cart-body" class="modal-body container-fluid">
+                </div>
+                <div id="modal-body-footer" class="modal-body container-fluid">
+                    <div id="modal-cart-total-price" class="row modal-footer-adj">
+                        <div class="col-xs-8 text-right center-vert">
+                            <div>Total Price:</div>
+                        </div>
+                        <div id="total-price" class="col-xs-4 text-left"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-skin" data-dismiss="modal">Close</button>
+                    <button id="checkout-button" type="button" class="btn btn-skin-important">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS scripts that this page uses, jquery as well as a custom script (guitar-shop.js) -->
+    <script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery.livequery.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/guitar-shop.js"></script>
 </body>
 </html>
