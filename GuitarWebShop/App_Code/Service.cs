@@ -8,21 +8,19 @@ using System.Text;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Driver.Builders;
+using MongoDB.Bson.IO;
 
 // NOTE: You can use the "Rename" command on the "Refactor" menu 
 // to change the class name "Service" in code, svc and config file together.
 [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
 public class Service : IService
 {
-    private IMongoQuery m_cachedQuery = null;
-
     public string[] GetProductList(int page)
     {
         // Specify connection string for mongo database
         var connectionString = "mongodb://localhost:27017/?safe=true";
 
         // Open the connection towards the server
-        //var server = MongoServer.Create(connectionString);
         var client = new MongoClient(connectionString);
         var server = client.GetServer();
 
@@ -48,13 +46,12 @@ public class Service : IService
         return string.Empty;
     }
 
-    public long GetDataCount(string categories, string filters)
+    public long GetDataCount(string categories, string filters, double minPrice, double maxPrice)
     {
         // Specify connection string for mongo database
         var connectionString = "mongodb://localhost:27017/?safe=true";
 
         // Open the connection towards the server
-        //var server = MongoServer.Create(connectionString);
         var client = new MongoClient(connectionString);
         var server = client.GetServer();
 
@@ -63,25 +60,29 @@ public class Service : IService
 
         var collection = db.GetCollection<BsonDocument>("items");
 
+        IList<IMongoQuery> queries = null;
         if (!categories.Equals("", StringComparison.Ordinal))
-            m_cachedQuery = buildQuery(categories, filters);
+            queries = buildQueries(categories, filters);
 
-        if (m_cachedQuery != null)
-            return collection.Find(m_cachedQuery).Count();
+        var priceQuery = buildPriceQuery(minPrice, maxPrice);
+        var filterQuery = queries == null ? null : Query.Or(queries);
+
+        var finalQuery = mergeQueries(priceQuery, filterQuery);
+
+        if (finalQuery != null)
+        {
+            return collection.Find(finalQuery).Count();
+        }
         else
             return collection.FindAll().Count();
     }
 
-    public string[] GetFilteredItems(int page, string categories, string filters)
+    public string[] GetFilteredItems(int page, string categories, string filters, double minPrice, double maxPrice)
     {
-        if (categories == "")
-            return GetProductList(page);
-
         // Specify connection string for mongo database
         var connectionString = "mongodb://localhost:27017/?safe=true";
 
         // Open the connection towards the server
-        //var server = MongoServer.Create(connectionString);
         var client = new MongoClient(connectionString);
         var server = client.GetServer();
 
@@ -91,107 +92,43 @@ public class Service : IService
        
         var collection = db.GetCollection<BsonDocument>("items");
 
-        IEnumerable<BsonDocument> bsons = null;
-
+        IList<IMongoQuery> queries = null;
         if (!categories.Equals("", StringComparison.Ordinal))
-            m_cachedQuery = buildQuery(categories, filters);
+            queries = buildQueries(categories, filters);
 
-        if (m_cachedQuery != null)
+        var priceQuery = buildPriceQuery(minPrice, maxPrice);
+        var filterQuery = queries == null ? null : Query.Or(queries);
+
+        var finalQuery = mergeQueries(priceQuery, filterQuery);
+
+        IEnumerable<BsonDocument> bsonData;
+
+        if (finalQuery != null)
         {
-            bsons = paginate(collection.Find(m_cachedQuery).SetSortOrder(SortBy.Ascending("name")), page);
+            bsonData = paginate(collection.Find(finalQuery).SetSortOrder(SortBy.Ascending("name")), page);
         }
         else
-            bsons = paginate(collection.FindAll().SetSortOrder(SortBy.Ascending("name")), page);
+            bsonData = paginate(collection.FindAll().SetSortOrder(SortBy.Ascending("name")), page);
 
         List<string> products = new List<string>();
 
-        foreach (BsonDocument doc in bsons)
+        var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+        foreach (BsonDocument doc in bsonData)
         {
-            products.Add(doc.ToJson());
+            doc["_id"] = doc["_id"].ToString();
+            products.Add(doc.ToJson(jsonWriterSettings));
         }
+
+        //foreach (string prod in products)
+        //{
+        //    prod.
+        //}
+        
         return products.ToArray();
     }
 
-    // This function takes a list of categories and filters and builds a query based on that
-    private IMongoQuery buildQuery(string categories, string filters)
-    {
-        // This list will hold all our queries
-        IList<IMongoQuery> queries = new List<IMongoQuery>();
-
-        // First, deserialze categories and build a query from them
-        string[] categs = categories.Split('|');
-        BsonValue[] bsonCategs = new BsonString[categs.Length];
-        for (int i = 0; i < categs.Length; i++) bsonCategs[i] = categs[i];
-
-        queries.Add(Query.In("category", bsonCategs));
-
-        // Early exit for performance
-        if (filters.Equals("", StringComparison.Ordinal))
-            return Query.And(queries);
-        
-        // Now, if we have additional filters, process them
-        Dictionary<string, IList<BsonValue>> queryObject = new Dictionary<string, IList<BsonValue>>();
-        string[] filts = filters.Split('|');
-        for (int i = 0; i < filts.Length; i++)
-        {
-            string[] parts = filts[i].Split('-');
-            
-            // If first part belongs in a given category set, it's a valid filter
-            if (Array.IndexOf(categs, parts[0]) != -1)
-            {
-                // If second part is not in the dictionary, create an entry
-                if (!queryObject.ContainsKey(parts[1]))
-                    queryObject.Add(parts[1], new List<BsonValue>());
-
-                // Finally add the third part as part of the value
-                IList<BsonValue> value = queryObject[parts[1]];
-                value.Add(new BsonString(parts[2]));
-            }
-        }
-
-        foreach (var element in queryObject)
-            queries.Add(Query.In(element.Key, element.Value));
-
-        return Query.And(queries);
-    }
-
-    public string[] GetItemsWithCachedQuery(int page)
-    {
-        if (m_cachedQuery == null)
-            return GetProductList(page);
-        else
-        {
-            // Specify connection string for mongo database
-            var connectionString = "mongodb://localhost:27017/?safe=true";
-
-            // Open the connection towards the server
-            //var server = MongoServer.Create(connectionString);
-            var client = new MongoClient(connectionString);
-            var server = client.GetServer();
-
-            // Fetch the database named guitar_shop
-            var db = server.GetDatabase("guitar_shop");
-
-
-            var collection = db.GetCollection<BsonDocument>("items");
-
-            var bsons = paginate(collection.Find(m_cachedQuery).SetSortOrder(SortBy.Ascending("name")), page);
-
-            List<string> products = new List<string>();
-
-            foreach (BsonDocument doc in bsons)
-            {
-                products.Add(doc.ToJson());
-            }
-
-            return products.ToArray();
-        }
-    }
-
-    private IEnumerable<BsonDocument> paginate(MongoCursor<BsonDocument> collection, int page)
-    {
-        return collection.Skip(12 * (page - 1)).Take(12);
-    }
+    
+    
 
     public string[] GetDistinctValues(string property, string category)
     {
@@ -199,7 +136,6 @@ public class Service : IService
         var connectionString = "mongodb://localhost:27017/?safe=true";
 
         // Open the connection towards the server
-        //var server = MongoServer.Create(connectionString);
         var client = new MongoClient(connectionString);
         var server = client.GetServer();
 
@@ -221,5 +157,200 @@ public class Service : IService
         }
 
         return products.ToArray();
+    }
+
+    public double[] GetPropertyRange(string property)
+    {
+        double[] minMax = new double[2];
+
+        // Specify connection string for mongo database
+        var connectionString = "mongodb://localhost:27017/?safe=true";
+
+        // Open the connection towards the server
+        var client = new MongoClient(connectionString);
+        var server = client.GetServer();
+
+        // Fetch the database named guitar_shop
+        var db = server.GetDatabase("guitar_shop");
+
+        var collection = db.GetCollection<BsonDocument>("items");
+
+        var minDocument = collection.Find(Query.Exists("price")).SetSortOrder(SortBy.Ascending("price")).SetLimit(1).First();
+        var maxDocument = collection.Find(Query.Exists("price")).SetSortOrder(SortBy.Descending("price")).SetLimit(1).First();
+
+        minMax[0] = minDocument["price"].AsDouble;
+        minMax[1] = maxDocument["price"].AsDouble;
+
+        return minMax;
+    }
+
+    // This function takes a list of categories and filters and builds a query based on that
+    private IList<IMongoQuery> buildQueries(string categories, string filters)
+    {
+        // This list will hold all our queries
+        IList<IMongoQuery> queries = new List<IMongoQuery>();
+
+        // First, deserialze categories and build a query from them
+        string[] categs = categories.Split('|');
+        for (int i = 0; i < categs.Length; i++)
+        {
+            queries.Add(Query.EQ("category", categs[i]));
+        }
+
+        // Early exit for performance
+        if (filters.Equals("", StringComparison.Ordinal))
+            return queries;
+
+        // Now, if we have additional filters, process them (THIS PART IS NOT FOR THE FAINT OF HEART)
+        Dictionary<string, Dictionary<string, IList<BsonValue>>> queryDict = new Dictionary<string, Dictionary<string, IList<BsonValue>>>();
+        
+        // First add categories that user selected
+        for (int i = 0; i < categs.Length; i++)
+            queryDict.Add(categs[i], new Dictionary<string, IList<BsonValue>>());
+
+        // Now process the actual filters
+        string[] filts = filters.Split('|');
+        for (int i = 0; i < filts.Length; i++)
+        {
+            string[] parts = filts[i].Split('-');
+
+            // If first part belongs in a given category set, it's a valid filter
+            if (queryDict.ContainsKey(parts[0]))
+            {
+                // If second part is not in the dictionary, create an entry
+                if (!queryDict[parts[0]].ContainsKey(parts[1]))
+                    queryDict[parts[0]].Add(parts[1], new List<BsonValue>());
+
+                // Finally add the third part as part of the value
+                IList<BsonValue> value = queryDict[parts[0]][parts[1]];
+                value.Add(new BsonString(parts[2]));
+            }
+        }
+        
+        // Reset queries at this point, we're building a new list
+        queries = new List<IMongoQuery>(); 
+        foreach (var element in queryDict)
+        {
+            IList<IMongoQuery> tempQueryList = new List<IMongoQuery>();
+            tempQueryList.Add(Query.EQ("category", element.Key));
+
+            foreach (var inner in queryDict[element.Key])
+            {
+                tempQueryList.Add(Query.In(inner.Key, inner.Value));
+            }
+
+            queries.Add(Query.And(tempQueryList));
+        }
+
+        return queries;
+    }
+
+    private IMongoQuery buildPriceQuery(double minPrice, double maxPrice)
+    {
+        IMongoQuery minQuery = null;
+        IMongoQuery maxQuery = null;
+        if (minPrice != 0.0 && !double.IsNaN(minPrice))
+            minQuery = Query.GTE("price", minPrice);
+        if (maxPrice != 0.0 && !double.IsNaN(maxPrice))
+            maxQuery = Query.LTE("price", maxPrice);
+
+        if (minQuery == null)
+            return maxQuery;
+        if (maxQuery == null)
+            return minQuery;
+
+        return Query.And(minQuery, maxQuery);
+    }
+
+    private IMongoQuery mergeQueries(IMongoQuery priceQuery, IMongoQuery filterQuery)
+    {
+        if (priceQuery == null)
+            return filterQuery;
+        if (filterQuery == null)
+            return priceQuery;
+
+        return Query.And(priceQuery, filterQuery);
+    }
+    private IEnumerable<BsonDocument> paginate(MongoCursor<BsonDocument> collection, int page)
+    {
+        return collection.Skip(12 * (page - 1)).Take(12);
+    }
+
+    public string AddItem(string category, string name, string type, string brand, double year, double price, double extra, string tags, string imageUrl, string brandLogoUrl)
+    {
+        var connectionString = "mongodb://localhost:27017/?safe=true";
+        var client = new MongoClient(connectionString);
+        var server = client.GetServer();
+        var db = server.GetDatabase("guitar_shop");
+        var collection = db.GetCollection<BsonDocument>("items");
+
+        var query = Query.EQ("name", name);
+
+        if (collection.Find(query).Count() > 0)
+            return "A item with that name already exists in your shop.";
+
+        var splitTags = tags.Split(',');
+
+        switch (category)
+        {
+            case "guitar":
+                Guitar newGuitar = new Guitar
+                {
+                    category = category,
+                    name = name,
+                    type = type,
+                    brand = brand,
+                    year = (int)year,
+                    price = price,
+                    strings = (int)extra,
+                    tags = new List<String>(splitTags),
+                    imageUrl = imageUrl,
+                    brandLogoUrl = brandLogoUrl
+                };
+
+                collection.Insert(newGuitar);
+
+                break;
+
+            case "amp":
+                Amplifier newAmplifier = new Amplifier
+                {
+                    category = category,
+                    name = name,
+                    type = type,
+                    brand = brand,
+                    year = (int)year,
+                    price = price,
+                    power = (int)extra,
+                    tags = new List<String>(splitTags),
+                    imageUrl = imageUrl,
+                    brandLogoUrl = brandLogoUrl
+                };
+
+                collection.Insert(newAmplifier);
+
+                break;
+
+            case "pedal":
+                Pedal newPedal = new Pedal
+                {
+                    category = category,
+                    name = name,
+                    type = type,
+                    brand = brand,
+                    year = (int)year,
+                    price = price,
+                    tags = new List<String>(splitTags),
+                    imageUrl = imageUrl,
+                    brandLogoUrl = brandLogoUrl
+                };
+
+                collection.Insert(newPedal);
+
+                break;
+        }
+
+        return "A new " + category + " inserted successfully";
+        //Example - A new pedal inserted successfully
     }
 }

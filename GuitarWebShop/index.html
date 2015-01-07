@@ -21,19 +21,22 @@
 <body>
     <div class="container">
 
-        <!-- Reserved for future use -->
-        <div id="nav-bar" class="row">
-        </div>
-
         <!-- The header of the page, colored dark red -->
         <div id="header-div" class="row drops-shadow">
             <div class="col-xs-1">
-                <img src="res/logo.png" />
+                <img id="site-logo" src="res/logo.png" />
             </div>
             <div class="col-xs-6">
                 <h1 id="logo-1" class="logo">GUITAR<span id="logo-2" class="logo">LOUNGE</span></h1>
             </div>
-            <div class="col-xs-2 col-xs-offset-3 center-vert">
+            <div class="col-xs-2 col-xs-offset-1 center-vert">
+                <button id="add-modal-button" class="btn btn-block btn-skin admin-tool"
+                        data-toggle="modal"
+                        href="#addModal">
+                    ADD NEW ITEM
+                </button>
+            </div>
+            <div class="col-xs-2 center-vert">
                 <button id="view-cart-button" class="btn btn-block btn-skin"
                         data-toggle="modal"
                         href="#cartModal">
@@ -42,12 +45,30 @@
             </div>
         </div>
 
-
-
         <!-- Main div that represents the items and the side-bar -->
         <div id="content-div" class="row">
             <div id="side-bar-div" class="col-xs-2">
-                <div id="guitar-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="guitar">
+                <div id="price-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="price">
+                    <label>Price Range</label>
+                    <span class="glyphicon glyphicon-ok glyph-class"></span>
+                </div>
+                <div id="price-filter" class="filter-div">
+
+                    <div id="price-range-div">
+                    </div>
+                    <div class="form-group">
+                        <label id="min-price-label" for="min-price">Min Price</label>
+                        <input type="number" class="form-control" id="min-price" />
+                    </div>
+                    <div class="form-group">
+                        <label id="max-price-label" for="max-price">Max Price</label>
+                        <input type="number" class="form-control" id="max-price" />
+                    </div>
+
+                    <button id="price-search-button" class="btn btn-block btn-skin">Search</button>
+
+                </div>
+                <div id="guitar-filter-div" class="cat-filter cat-filter-div drops-shadow margin-vert-5" value="guitar">
                     <label>Guitars</label>
                     <span class="glyphicon glyphicon-ok glyph-class"></span>
                 </div>
@@ -58,7 +79,7 @@
                     </div>
                 </div>
 
-                <div id="amp-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="amp">
+                <div id="amp-filter-div" class="cat-filter cat-filter-div drops-shadow margin-vert-5" value="amp">
                     <label>Amplifiers</label>
                     <span class="glyphicon glyphicon-ok glyph-class"></span>
                 </div>
@@ -67,8 +88,10 @@
                     </div>
                     <div id="amp-brand-filter">
                     </div>
+                    <div id="amp-power-filter">
+                    </div>
                 </div>
-                <div id="pedal-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="pedal">
+                <div id="pedal-filter-div" class="cat-filter cat-filter-div drops-shadow margin-vert-5" value="pedal">
                     <label>Pedals</label>
                     <span class="glyphicon glyphicon-ok glyph-class"></span>
                 </div>
@@ -103,7 +126,6 @@
                     </div>
                 </div>
                 <div id="item-content-div" class="row">
-
                 </div>
             </div>
         </div>
@@ -135,9 +157,99 @@
         </div>
     </div>
 
+    <!-- Modal for the insertion -->
+    <div id="addModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title title-font">Add New Item</h4>
+                </div>
+                <div id="modal-add-body" class="modal-body container-fluid">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="name-input" class="col-sm-2 control-label">Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name-input" placeholder="Item Name" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Category</label>
+                            <div class="col-sm-6">
+                                <div class="dropdown">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="drop-down-cat" value="guitar" data-toggle="dropdown" aria-expanded="true">
+                                        Guitar
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="drop-down-cat">
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" value="guitar" href="#">Guitar</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" value="amp" href="#">Amplifier</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" value="pedal" href="#">Pedal</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="type-input" class="col-sm-2 control-label">Type</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="type-input" placeholder="Type" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="brand-input" class="col-sm-2 control-label">Brand</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="brand-input" placeholder="Brand Name" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="year-input" class="col-sm-2 control-label">Year</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="year-input" placeholder="Year Made in" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="price-input" class="col-sm-2 control-label">Price</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="price-input" placeholder="Price in USD" />
+                            </div>
+                        </div>
+                        <div class="form-group" id="extra-form-group">
+                            <label id="extra-attrib-label" for="extra-input" class="col-sm-2 control-label">Strings</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="extra-input" placeholder="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="image-url-input" class="col-sm-2 control-label">Image URL</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="image-url-input" placeholder="Image URL" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="brand-url-input" class="col-sm-2 control-label">Brand URL</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="brand-url-input" placeholder="Brand Image URL" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tags-input" class="col-sm-2 control-label">Tags</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="tags-input" placeholder="Please type in tags with a single comma in between" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-skin" data-dismiss="modal">Close</button>
+                    <button id="add-button" type="button" class="btn btn-skin-important">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JS scripts that this page uses, jquery as well as a custom script (guitar-shop.js) -->
     <script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
-    <script type="text/javascript" src="js/jquery.livequery.js"></script>
+    <script type="text/javascript" src="js/jquery.animate-colors-min.js"></script>
     <script type="text/javascript" src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/guitar-shop.js"></script>
 </body>

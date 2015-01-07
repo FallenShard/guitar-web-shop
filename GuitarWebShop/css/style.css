@@ -1,6 +1,6 @@
 ﻿#header-div {
     height: 75px;
-    background: #990000;
+    background-color: #990000;
     margin-bottom: 10px;
 }
 
@@ -108,7 +108,6 @@
 .item-title-div {
     width: 100%;
     height: 50px;
-    background: #990000;
     color: white;
     padding-left: 5px;
     padding-top: 5px;
@@ -215,24 +214,19 @@
 }
 
 .pagination li a:focus {
-    color: white;
-    background: #990000;
+    color: #990000;
+    background: white;
 }
 
 .pagination li a:active {
-    color: white;
-    background: #990000;
-}
-
-.pag-pressed {
-    color: white;
-    background: #990000;
+    color: #990000;
+    background: white;
 }
 
 .cat-filter-div {
     font-family: 'Changa One', cursive;
     font-size: 1.4em;
-    background: black;
+    background-color: black;
     color: white;
     cursor: pointer;
     padding: 5px 15px;
@@ -241,6 +235,7 @@
 .filter-div {
     font-family: 'Open Sans', sans-serif;
     padding-left: 10px;
+    padding-right: 10px;
 }
 
 .filter-label {
@@ -268,5 +263,27 @@
     /*margin-left: 45px;*/
     border: 3px solid white;
     border-radius: 4px;
+    display: none;
+}
+
+.form-group input[type=number]:focus {
+    border-color: red;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(255, 0, 0, .6);
+}
+
+/*.var-bd-div {
+    background-color: white;
+    color: #990000;
+    border-color: #990000;
+    border: 2px;
+    border-radius: 3px;
+}*/
+
+.var-bd-div {
+    background-color: #990000;
+    color: white;
+}
+
+.admin-tool {
     display: none;
 }

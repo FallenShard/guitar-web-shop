@@ -5,6 +5,7 @@
     var itemsPerPage = 12;
     var totalPages = 0;
     var currentPage = 1;
+    var activePageId = 1;
     var paginationArray = [1, 2, 3];
     var currentOpenedBox = -1;
     var jsonCart = [];
@@ -16,6 +17,8 @@
     var minFilterChain = [];
     var catFilterChain = [];
     var dataCount = 0;
+    var minPriceFilter = 0;
+    var maxPriceFilter = 0;
 
     // Pretty print regex for numbers which adds commas after every third digit
     function numberWithCommas(x) {
@@ -189,6 +192,7 @@
     function buildCartRowView(cartIndex) {
         var rowDiv = document.createElement("div");
         $(rowDiv).attr("id", "cart-row-" + jsonCart[cartIndex]._id);
+        
         $(rowDiv).attr("value", cartIndex);
         $(rowDiv).attr("class", "row-fluid padded-vert");
 
@@ -234,13 +238,13 @@
 
         // This is the rectangle behind title, the red one at the moment
         var itemTitleDiv = document.createElement("div");
-        $(itemTitleDiv).attr("class", "item-title-div drops-shadow");
+        $(itemTitleDiv).attr("class", "item-title-div drops-shadow var-bd-div");
         $(itemTitleDiv).append(item.name);
 
         // This is the image of the item, fixed to 150x150
         var itemImage = document.createElement("img");
         $(itemImage).attr("src", "res/images/" + item.imageUrl);
-        $(itemImage).attr("alt", "http://placehold.it/150x150");
+        $(itemImage).addClass("use-backup");
 
         // This is the image wrapper and "price" span wrapper
         var itemImageDiv = document.createElement("div");
@@ -279,8 +283,9 @@
 
         // This is the image of the div
         var detailsImage = document.createElement("img");
-        $(detailsImage).attr("class", "img-responsive col-xs-4");
         $(detailsImage).attr("src", "res/images/" + item.imageUrl);
+        $(detailsImage).attr("class", "img-responsive col-xs-4");
+        $(detailsImage).addClass("use-backup");
 
         // This is div that will hold the right side
         var detailsDataDiv = document.createElement("div");
@@ -317,8 +322,9 @@
 
         // This is the right part of the middle, brand logo
         var brandImg = document.createElement("img");
-        $(brandImg).attr("class", "col-xs-offset-1 col-xs-4");
         $(brandImg).attr("src", "res/logos/" + item.brandLogoUrl);
+        $(brandImg).attr("class", "col-xs-offset-1 col-xs-4");
+        $(brandImg).addClass("use-backup");
 
         // This is the price that appears in the 3rd div
         var detailsFooterCol = document.createElement("div");
@@ -372,7 +378,7 @@
             success: function (msg) {           // Callback for successful ajax call
                 callback(msg);
             },
-            error: function () {                // Callback if ajax fails
+            error: function (result) {                // Callback if ajax fails
                 alert("Error loading products" + result.status + " " + result.statusText);
             }
         });
@@ -394,7 +400,9 @@
                 var item = JSON.parse(result[i]);;
                 jsonCache.push(item);
             }
-            catch (exception) {
+            catch (exception)
+            {
+                alert("JSON Parsing exception!");
                 return;
             }
 
@@ -422,6 +430,10 @@
         $(".btn-add-to-cart").click(function (event) {
             onAddToCartClick($(this), event);
         });
+
+        $(".use-backup").error(function () {
+            $(this).attr('src', "res/unknown.png");
+        });
     }
     
     // Handler for the filter checkbox clicks
@@ -433,6 +445,7 @@
         else if (target.is(":not(:checked)"))
             removeFromFilters(minFilterChain, filter);
 
+        console.log(minFilterChain);
         ajaxDataCount();
     }
 
@@ -454,8 +467,34 @@
         $(span).fadeToggle("slow");
     }
 
+    function onPriceFilterClicked(target) {
+        var targetId = target.attr("id");
+        var divToChangeId = targetId.toString().slice(0, -4);
+        var divToChange = $("#" + divToChangeId);
+        divToChange.slideToggle("slow", function () {
+            var filterFromTarget = target.attr("value");
+            if (divToChange.is(":not(:visible)"))
+            {
+                minPriceFilter = 0;
+                maxPriceFilter = 0;
+                $("#min-price").val("");
+                $("#max-price").val("");
+            }
+
+            ajaxDataCount();
+        });
+
+        var span = target.children("span");
+        $(span).fadeToggle("slow");
+    }
+
     function ajaxDataCount() {
-        var data = { categories: flattenFilter(catFilterChain), filters: flattenFilter(minFilterChain) };
+        var data = {
+            categories: flattenFilter(catFilterChain),
+            filters: flattenFilter(minFilterChain),
+            minPrice: minPriceFilter,
+            maxPrice: maxPriceFilter
+        };
         ajaxService("GET", data, "GetDataCount", onDataCountSuccess);
     }
 
@@ -464,6 +503,7 @@
 
         totalPages = Math.ceil(dataCount / itemsPerPage);
         currentPage = 1;
+        activePageId = 1;
 
         resetPagination();
         adjustPaginationHeader();
@@ -472,17 +512,17 @@
     }
 
     function ajaxFilterSearch() {
-        var data = { page: currentPage, categories: flattenFilter(catFilterChain), filters: flattenFilter(minFilterChain) };
+        var data = {
+            page: currentPage,
+            categories: flattenFilter(catFilterChain),
+            filters: flattenFilter(minFilterChain),
+            minPrice: minPriceFilter,
+            maxPrice: maxPriceFilter
+        };
         ajaxService("GET", data, "GetFilteredItems", onProductListSuccess);
     }
 
-    function ajaxCachedSearch() {
-        var data = { page: currentPage };
-        ajaxService("GET", data, "GetItemsWithCachedQuery", onProductListSuccess);
-    }
-
     function onPageClicked(target) {
-
         var parent = target.parent();
         if (parent.hasClass("disabled")) return;
 
@@ -497,24 +537,51 @@
         {
             var pagesToLeft = targetPage - 1;
             if (pagesToLeft > 0) {
-                for (var i = 0; i < 3; i++) {
-                    paginationArray[i]--;
-                    $("#page-" + (i + 1)).empty().append(paginationArray[i]);
-                }
+                decrementPaginationView();
             }
         }
         else if (targetPos == 3)
         {
             var pagesToRight = totalPages - targetPage;
             if (pagesToRight > 0) {
-                for (var i = 0; i < 3; i++) {
-                    paginationArray[i]++;
-                    $("#page-" + (i + 1)).empty().append(paginationArray[i]);
-                }
+                incrementPaginationView();
+            }
+        }
+
+        for (var i = 0; i < 3; i++)
+        {
+            var currPage = $("#page-" + (i + 1));
+            var newTargetPage = currPage.text();
+            currPage.attr("style", "");
+            if (newTargetPage == currentPage)
+            {
+                activePageId = i + 1;
+                currPage.attr("style", "color: white; background: #990000;");
             }
         }
 
         adjustPaginationHeader();
+    }
+
+    function incrementPaginationView() {
+        for (var i = 0; i < 3; i++) {
+            paginationArray[i]++;
+            $("#page-" + (i + 1)).empty().append(paginationArray[i]);
+        }
+    }
+
+    function decrementPaginationView() {
+        for (var i = 0; i < 3; i++) {
+            paginationArray[i]--;
+            $("#page-" + (i + 1)).empty().append(paginationArray[i]);
+        }
+    }
+
+    function onPriceSearchClicked() {
+        minPriceFilter = parseFloat($("#min-price").val());
+        maxPriceFilter = parseFloat($("#max-price").val());
+
+        ajaxDataCount();
     }
 
     function resetPagination() {
@@ -522,6 +589,7 @@
             paginationArray[i] = i + 1;
             var pageEntry = $("#page-" + (i + 1));
             pageEntry.empty().append(paginationArray[i]);
+            pageEntry.attr("style", "");
             var parentLi = pageEntry.parent();
             $(parentLi).removeClass("disabled");
             if ((i + 1) > totalPages)
@@ -529,6 +597,8 @@
                 $(parentLi).addClass("disabled");
             } 
         }
+
+        $("#page-1").attr("style", "color: white; background: #990000;");
     }
 
     function adjustPaginationHeader() {
@@ -547,25 +617,57 @@
         var header = msg[0] + '-' + msg[1];
         for (var i = 2; i < msg.length; i++)
         {
-            targetDiv.append('<div class="checkbox"><label><input type="checkbox" value="'
-                + header + '-' + msg[i] + '"/>' + msg[i] + '</label></div>');
-        }
+            var checkboxDiv = document.createElement("div");
+            var checkboxLabel = document.createElement("label");
+            var checkboxInput = document.createElement("input");
 
-        $('input[type="checkbox"]').click(function () {
-            onFilterClicked($(this));
-        });
+            $(checkboxInput).attr("type", "checkbox");
+            $(checkboxInput).attr("value", header + '-' + msg[i]);
+
+            $(checkboxLabel).append(checkboxInput);
+            $(checkboxLabel).append(msg[i]);
+
+            $(checkboxDiv).attr("class", "checkbox");
+            $(checkboxDiv).append(checkboxLabel);
+
+            targetDiv.append(checkboxDiv);
+
+            $(checkboxInput).click(function () {
+                onFilterClicked($(this));
+            });
+        }
     }
 
-    var documentInit = function () {
-        // First of all, get the total data count
-        // Another ajax inside will grab the actual data
-        ajaxDataCount();
+    function ajaxPropertyRange(prop) {
+        var data = { property: prop };
+        ajaxService("GET", data, "GetPropertyRange", onPropertyRangeSuccess);
+    }
+
+    function onPropertyRangeSuccess(msg) {
+        $("#min-price-label").empty().append("Min Price ($ " + numberWithCommas(msg[0].toFixed(2)) + ")");
+        $("#max-price-label").empty().append("Max Price ($ " + numberWithCommas(msg[1].toFixed(2)) + ")");
+    }
+
+    function sideBarSetup() {
         ajaxDistinctValues("type", "guitar");
         ajaxDistinctValues("brand", "guitar");
         ajaxDistinctValues("type", "amp");
         ajaxDistinctValues("brand", "amp");
         ajaxDistinctValues("type", "pedal");
         ajaxDistinctValues("brand", "pedal");
+    }
+
+    var documentInit = function () {
+        // First of all, get the total data count
+        // Another ajax inside will grab the actual data
+        ajaxDataCount();
+        sideBarSetup();
+
+        ajaxPropertyRange("price");
+
+        $("#price-search-button").click(function () {
+            onPriceSearchClicked($(this));
+        });
 
         for (var i = 1; i < 4; i++) {
             $('#page-' + i).click(function () {
@@ -573,25 +675,15 @@
             });
         }
 
-        $('input[type="checkbox"]').click(function () {
-            onFilterClicked($(this));
-        });
-
-        $("#guitar-filter-div").click(function () {
+        $(".cat-filter").click(function () {
             onCatFilterClicked($(this));
         });
 
-        $("#amp-filter-div").click(function () {
-            onCatFilterClicked($(this));
-        });
+        $("#price-filter-div").click(function () {
+            onPriceFilterClicked($(this));
+        })
 
-        $("#pedal-filter-div").click(function () {
-            onCatFilterClicked($(this));
-        });
-
-        $("#guitar-filter").hide();
-        $("#amp-filter").hide();
-        $("#pedal-filter").hide();
+        $(".filter-div").hide();
 
         // Checkout event handling setup
         $("#total-price").append("$ " + totalPrice.toFixed(2));
@@ -600,6 +692,113 @@
         $("#checkout-button").click(function () {
             onCheckOutClick($(this));
         });
+
+        $("#site-logo").click(function () {
+            $('.cat-filter-div').animate({ backgroundColor: '#000099' });
+            $('#header-div').animate({ backgroundColor: '#000099' });
+            $('.admin-tool').toggle("slow");
+            $('.var-bd-div').animate({ backgroundColor: '#000099'});
+        });
+
+        // Handle left arrow in pagination
+        $("#prev-page").click(function () {
+            if (currentPage <= 1)
+                return;
+
+            $("#page-" + activePageId).attr("style", "");
+
+            currentPage--;
+            if (activePageId > 1) {
+                activePageId--;
+                $("#page-" + activePageId).attr("style", "color: white; background: #990000;");
+            }
+            else
+            {
+                decrementPaginationView();
+                $("#page-1").attr("style", "color: white; background: #990000;");
+            }
+
+            ajaxFilterSearch();
+            adjustPaginationHeader();
+        })
+
+        // Handle right arrow in pagination
+        $("#next-page").click(function () {
+            if (currentPage >= totalPages)
+                return;
+
+            $("#page-" + activePageId).attr("style", "");
+
+            currentPage++;
+            if (activePageId < 3) {
+                activePageId++;
+                $("#page-" + activePageId).attr("style", "color: white; background: #990000;");
+            }
+            else
+            {
+                incrementPaginationView();
+                $("#page-3").attr("style", "color: white; background: #990000;");
+            }
+
+            ajaxFilterSearch();
+            adjustPaginationHeader();
+        })
+
+        setupAddModal();
+
+        $("#btnSearch").click(function () {
+            alert($('.btn-select').text() + ", " + $('.btn-select2').text());
+        });
+    }
+
+    function setupAddModal() {
+        $(".dropdown-menu li a").click(function () {
+            var selText = $(this).text();
+            var comboBox = $(this).parents('.dropdown').find('.dropdown-toggle');
+            comboBox.empty().append(selText + ' <span class="caret"></span>');
+            comboBox.attr("value", $(this).attr("value"));
+            console.log($(this).attr("value"));
+
+            if (selText === "Guitar")
+            {
+                $("#extra-form-group").show("fast");
+                $("#extra-attrib-label").empty().append("Strings");
+            }
+            else if (selText === "Amplifier")
+            {
+                $("#extra-form-group").show("fast");
+                $("#extra-attrib-label").empty().append("Power");
+            }
+            else
+            {
+                $("#extra-form-group").hide("fast");
+            }
+        });
+
+        $("#add-button").click(function () {
+            var item = {};
+            item.category = $("#drop-down-cat").attr("value");
+            item.name = $("#name-input").val();
+            item.type = $("#type-input").val();
+            item.brand = $("#brand-input").val();
+            item.year = parseFloat($("#year-input").val());
+            item.price = parseFloat($("#price-input").val());
+
+            if (!(item.category === "pedal"))
+                item.extra = parseFloat($("#extra-input").val());
+
+            item.tags = $("#tags-input").val();
+            item.imageUrl = $("#image-url-input").val();
+            item.brandLogoUrl = $("#brand-url-input").val();
+
+            console.log(item);
+            ajaxService("GET", item, "AddItem", onAdditionSuccess);
+        });
+    }
+
+    function onAdditionSuccess(msg) {
+        // Refresh the page with newly added item
+        ajaxDataCount();
     }
 
     // Since the document is not instantly ready for manipulation, jQuery can detect that
