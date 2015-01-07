@@ -1,14 +1,16 @@
 ﻿#header-div {
     height: 75px;
     background: #990000;
-    box-shadow: 0 8px 6px -6px black;
     margin-bottom: 10px;
+}
+
+.drops-shadow {
+    box-shadow: 0 8px 5px -6px black;
 }
 
 #header-div img {
     height: 75px;
     width: 75px;
-    /*margin-left: -30px;*/
 }
 
 .logo {
@@ -101,7 +103,6 @@
 .item-div {
     height: 250px;
     cursor: pointer;
-    /*box-shadow: inset 0 -7px 9px -7px rgba(0,0,0,0.4);*/
 }
 
 .item-title-div {
@@ -112,7 +113,6 @@
     padding-left: 5px;
     padding-top: 5px;
     font-family: 'Open Sans', sans-serif;
-    box-shadow: 0 8px 5px -6px black;
 }
 
 .item-div img {
@@ -205,13 +205,68 @@
 
 .pagination li a {
     color: #990000;
+    font-family: 'Open Sans', sans-serif;
 }
 
 
 .pagination li a:hover {
-    color: #FF0000;
+    color: red;
+    background: #FFCCCC;
 }
 
 .pagination li a:focus {
-    color: #FF0000;
+    color: white;
+    background: #990000;
+}
+
+.pagination li a:active {
+    color: white;
+    background: #990000;
+}
+
+.pag-pressed {
+    color: white;
+    background: #990000;
+}
+
+.cat-filter-div {
+    font-family: 'Changa One', cursive;
+    font-size: 1.4em;
+    background: black;
+    color: white;
+    cursor: pointer;
+    padding: 5px 15px;
+}
+
+.filter-div {
+    font-family: 'Open Sans', sans-serif;
+    padding-left: 10px;
+}
+
+.filter-label {
+    font-size: 1.1em;
+    margin-left: -5px;
+}
+
+.margin-vert-5 {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+#page-counter {
+    font-size: 1.2em;
+    font-family: 'Open Sans', sans-serif;
+}
+
+#data-counter {
+    font-size: 1.2em;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.glyph-class {
+    float: right;
+    /*margin-left: 45px;*/
+    border: 3px solid white;
+    border-radius: 4px;
+    display: none;
 }

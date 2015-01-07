@@ -26,7 +26,7 @@
         </div>
 
         <!-- The header of the page, colored dark red -->
-        <div id="header-div" class="row">
+        <div id="header-div" class="row drops-shadow">
             <div class="col-xs-1">
                 <img src="res/logo.png" />
             </div>
@@ -36,29 +36,70 @@
             <div class="col-xs-2 col-xs-offset-3 center-vert">
                 <button id="view-cart-button" class="btn btn-block btn-skin"
                         data-toggle="modal"
-                        href="#myModal">
+                        href="#cartModal">
                     VIEW CART
                 </button>
             </div>
         </div>
 
+
+
         <!-- Main div that represents the items and the side-bar -->
         <div id="content-div" class="row">
-            <div id="side-bar-div" class="col-xs-2" style="background:#00ffff;">
-                Sidebar, clickables and stuff
+            <div id="side-bar-div" class="col-xs-2">
+                <div id="guitar-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="guitar">
+                    <label>Guitars</label>
+                    <span class="glyphicon glyphicon-ok glyph-class"></span>
+                </div>
+                <div id="guitar-filter" class="filter-div">
+                    <div id="guitar-type-filter">
+                    </div>
+                    <div id="guitar-brand-filter">
+                    </div>
+                </div>
+
+                <div id="amp-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="amp">
+                    <label>Amplifiers</label>
+                    <span class="glyphicon glyphicon-ok glyph-class"></span>
+                </div>
+                <div id="amp-filter" class="filter-div">
+                    <div id="amp-type-filter">
+                    </div>
+                    <div id="amp-brand-filter">
+                    </div>
+                </div>
+                <div id="pedal-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="pedal">
+                    <label>Pedals</label>
+                    <span class="glyphicon glyphicon-ok glyph-class"></span>
+                </div>
+                <div id="pedal-filter" class="filter-div">
+                    <div id="pedal-type-filter">
+                    </div>
+                    <div id="pedal-brand-filter">
+                    </div>
+                </div>
             </div>
 
             <div id="item-div" class="col-xs-10">
                 <div id="item-div-header" class="row">
-                    <div class="col-xs-offset-4 col-xs-4 text-center">
-                        <ul class="pagination">
+                    <div class="col-xs-4" style="height: 66px">
+                        <div id="data-counter" class="center-vert">
+                        </div>
+                    </div>
+
+                    <div class="col-xs-4 text-center">
+                        <ul id="pagination-ul" class="pagination">
                             <li><a id="prev-page" href="#">←</a></li>
                             <li><a id="page-1" href="#">1</a></li>
                             <li><a id="page-2" href="#">2</a></li>
                             <li><a id="page-3" href="#">3</a></li>
-                            <li><a id="page-4" href="#">4</a></li>
                             <li><a id="next-page" href="#">→</a></li>
                         </ul>
+                    </div>
+
+                    <div class="col-xs-4 text-right" style="height: 66px">
+                        <div id="page-counter" class="center-vert">
+                        </div>
                     </div>
                 </div>
                 <div id="item-content-div" class="row">
@@ -69,7 +110,7 @@
     </div>
 
     <!-- Modal for the cart -->
-    <div id="myModal" class="modal fade">
+    <div id="cartModal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

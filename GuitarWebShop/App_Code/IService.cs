@@ -24,6 +24,26 @@ public interface IService
                ResponseFormat = WebMessageFormat.Json)]
     string GetProductDetails(string id);
 
+    [OperationContract]
+    [WebInvoke(Method = "GET",
+               ResponseFormat = WebMessageFormat.Json)]
+    string[] GetFilteredItems(int page, string categories, string filters);
+
+    [OperationContract]
+    [WebInvoke(Method = "GET",
+               ResponseFormat = WebMessageFormat.Json)]
+    string[] GetItemsWithCachedQuery(int page);
+
+    [OperationContract]
+    [WebInvoke(Method = "GET",
+               ResponseFormat = WebMessageFormat.Json)]
+    long GetDataCount(string categories, string filters);
+
+    [OperationContract]
+    [WebInvoke(Method = "GET",
+               ResponseFormat = WebMessageFormat.Json)]
+    string[] GetDistinctValues(string property, string category);
+
     //[OperationContract]
     //[WebInvoke(Method         = "GET",
     //           ResponseFormat = WebMessageFormat.Json)]

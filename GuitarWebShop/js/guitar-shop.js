@@ -1,7 +1,11 @@
-﻿// This idiom in JavaScript is known as IIFE (Immediately-invoked Function Expression)
+﻿"use strict";
+// This idiom in JavaScript is known as IIFE (Immediately-invoked Function Expression)
 // It prevents pollution of global namespace by placing everything in an anonymous function and evaluates it immediately
 (function () {
     var itemsPerPage = 12;
+    var totalPages = 0;
+    var currentPage = 1;
+    var paginationArray = [1, 2, 3];
     var currentOpenedBox = -1;
     var jsonCart = [];
     var jsonCartQty = [];
@@ -9,6 +13,56 @@
     var totalPrice = 0;
     var hasCheckedOut = false;
     var modalFooter = null;
+    var minFilterChain = [];
+    var catFilterChain = [];
+    var dataCount = 0;
+
+    // Pretty print regex for numbers which adds commas after every third digit
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function capitaliseFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function getExtraAttrib(obj) {
+        if (obj.category === "guitar")
+            return "strings:";
+        else if (obj.category === "pedal")
+            return " ";
+        else if (obj.category === "amp")
+            return "power:";
+    }
+
+    function getExtraValue(obj) {
+        if (obj.category === "guitar")
+            return obj.strings;
+        else if (obj.category === "pedal")
+            return " ";
+        else if (obj.category === "amp")
+            return obj.power + " W";
+    }
+
+    function addToFilters(filterChain, filter)
+    {
+        filterChain.push(filter);
+    }
+
+    function removeFromFilters(filterChain, filter)
+    {
+        var index = filterChain.indexOf(filter);
+        filterChain.splice(index, 1);
+    }
+
+    function flattenFilter(filterChain)
+    {
+        var i, result = "";
+        for (i = 0; i < filterChain.length; i++)
+            result = result + filterChain[i] + '|';
+
+        return result.slice(0, -1);
+    }
 
     // This is the callback on item click
     function onItemClick(target, e) {
@@ -26,11 +80,18 @@
         else
         {
             // Otherwise close the active item, and open a new one
-            if (currentOpenedBox !== -1)
-                $("#details-content-" + currentOpenedBox).slideUp("fast");
+            closeActiveDetailsView();
             
             $("#details-content-" + num).slideDown("fast");
             currentOpenedBox = num;
+        }
+    }
+
+    function closeActiveDetailsView() {
+        if (currentOpenedBox !== -1)
+        {
+            $("#details-content-" + currentOpenedBox).slideUp("fast");
+            currentOpenedBox = -1;
         }
     }
 
@@ -164,7 +225,7 @@
         return rowDiv;
     }
 
-    // Builds the view for a single item, with a given JSON, index and itemsPerRow
+    // Builds the view for a single item, with a given JSO, index and itemsPerRow
     function buildItemView(item, index, itemsPerRow) {
         var itemDiv = document.createElement("div");
         $(itemDiv).attr("value", (index + 1));
@@ -173,7 +234,7 @@
 
         // This is the rectangle behind title, the red one at the moment
         var itemTitleDiv = document.createElement("div");
-        $(itemTitleDiv).attr("class", "item-title-div");
+        $(itemTitleDiv).attr("class", "item-title-div drops-shadow");
         $(itemTitleDiv).append(item.name);
 
         // This is the image of the item, fixed to 150x150
@@ -204,7 +265,7 @@
         return itemDiv;
     }
 
-    // Builds the view for a single item, with a given JSON
+    // Builds the view for a single item, with a given JSO and index
     function buildDetailsView(item, index)
     {
         // This is the details row div, theres a total of n = itemsPerPage of them, all hidden
@@ -317,21 +378,17 @@
         });
     }
 
-
     // Callback if the service call succeeds
     function onProductListSuccess(result) {
-        currentOpenedBox = -1;
         var itemList = document.getElementById("item-content-div");
-        var sidebar = document.getElementById("side-bar-div");
         var rowDiv;
         var itemsPerRow = 4;
+        currentOpenedBox = -1;
 
         $(itemList).empty();
-        $(sidebar).empty();
         jsonCache = [];
 
         for (var i = 0; i < result.length; i++) {
-
             // Attempt JSON parse, equivalent to eval
             try {
                 var item = JSON.parse(result[i]);;
@@ -357,19 +414,7 @@
             // Detail div gets appended to the item list, so it appears below
             $(itemList).append(detailsDiv);
         }
-
-        // This is for future use, all tags and search criteria checkboxes,
-        // will add more stuff in the future, and probably out of this loop
-        var tagDiv = document.createElement("div");
-        $(tagDiv).attr("class", "row");
-        var tagCb = document.createElement("input");
-        var tagCbLabel = document.createElement("label");
-        $(tagCbLabel).append("Checkbox");
-        $(tagCb).attr("type", "checkbox");
-        $(tagCb).append(tagCbLabel);
-        $(tagDiv).append(tagCb);
-        $(sidebar).append(tagDiv);
-
+        
         $(".item-div").click(function (event) {
             onItemClick($(this), event);
         });
@@ -378,22 +423,177 @@
             onAddToCartClick($(this), event);
         });
     }
-
     
-    // Initialization callback
-    var documentInit = function () {
+    // Handler for the filter checkbox clicks
+    function onFilterClicked(target) {
+        var filter = target.attr("value");
+        
+        if (target.is(":checked"))
+            addToFilters(minFilterChain, filter);
+        else if (target.is(":not(:checked)"))
+            removeFromFilters(minFilterChain, filter);
 
-        // Array to hold cart item values
-        Arrays = new Array();
+        ajaxDataCount();
+    }
 
-        // Initiate ajax request to get the data from the server
-        ajaxService("GET", { page: 1 }, "GetProductList", onProductListSuccess);
+    function onCatFilterClicked(target) {
+        var targetId = target.attr("id");
+        var divToChangeId = targetId.toString().slice(0, -4);
+        var divToChange = $("#" + divToChangeId);
+        divToChange.toggle("slow", function () {
+            var filterFromTarget = target.attr("value");
+            if (divToChange.is(":visible"))
+                addToFilters(catFilterChain, filterFromTarget);
+            else
+                removeFromFilters(catFilterChain, filterFromTarget);
 
-        for (var i = 1; i < 5; i++)
+            ajaxDataCount();
+        });
+
+        var span = target.children("span");
+        $(span).fadeToggle("slow");
+    }
+
+    function ajaxDataCount() {
+        var data = { categories: flattenFilter(catFilterChain), filters: flattenFilter(minFilterChain) };
+        ajaxService("GET", data, "GetDataCount", onDataCountSuccess);
+    }
+
+    function onDataCountSuccess(msg) {
+        dataCount = msg;
+
+        totalPages = Math.ceil(dataCount / itemsPerPage);
+        currentPage = 1;
+
+        resetPagination();
+        adjustPaginationHeader();
+        
+        ajaxFilterSearch();
+    }
+
+    function ajaxFilterSearch() {
+        var data = { page: currentPage, categories: flattenFilter(catFilterChain), filters: flattenFilter(minFilterChain) };
+        ajaxService("GET", data, "GetFilteredItems", onProductListSuccess);
+    }
+
+    function ajaxCachedSearch() {
+        var data = { page: currentPage };
+        ajaxService("GET", data, "GetItemsWithCachedQuery", onProductListSuccess);
+    }
+
+    function onPageClicked(target) {
+
+        var parent = target.parent();
+        if (parent.hasClass("disabled")) return;
+
+        var targetId = target.attr("id");
+        var targetPos = targetId[targetId.length - 1];
+        var targetPage = target.text();
+
+        currentPage = targetPage;
+        ajaxFilterSearch();
+
+        if (targetPos == 1)
         {
-            $('#page-' + i).click(pageClick(i));
+            var pagesToLeft = targetPage - 1;
+            if (pagesToLeft > 0) {
+                for (var i = 0; i < 3; i++) {
+                    paginationArray[i]--;
+                    $("#page-" + (i + 1)).empty().append(paginationArray[i]);
+                }
+            }
+        }
+        else if (targetPos == 3)
+        {
+            var pagesToRight = totalPages - targetPage;
+            if (pagesToRight > 0) {
+                for (var i = 0; i < 3; i++) {
+                    paginationArray[i]++;
+                    $("#page-" + (i + 1)).empty().append(paginationArray[i]);
+                }
+            }
         }
 
+        adjustPaginationHeader();
+    }
+
+    function resetPagination() {
+        for (var i = 0; i < 3; i++) {
+            paginationArray[i] = i + 1;
+            var pageEntry = $("#page-" + (i + 1));
+            pageEntry.empty().append(paginationArray[i]);
+            var parentLi = pageEntry.parent();
+            $(parentLi).removeClass("disabled");
+            if ((i + 1) > totalPages)
+            {
+                $(parentLi).addClass("disabled");
+            } 
+        }
+    }
+
+    function adjustPaginationHeader() {
+        $("#page-counter").empty().append("Current page: " + currentPage + " of " + totalPages);
+        $("#data-counter").empty().append("Displaying results: " + Math.min(currentPage * itemsPerPage, dataCount) + " of " + dataCount);
+    }
+
+    function ajaxDistinctValues(prop, cat) {
+        var data = { property: prop, category: cat };
+        ajaxService("GET", data, "GetDistinctValues", onDistinctValuesSuccess);
+    }
+
+    function onDistinctValuesSuccess(msg) {
+        var targetDiv = $("#" + msg[0] + "-" + msg[1] + "-filter");
+        targetDiv.empty().append('<label class="filter-label">' + capitaliseFirstLetter(msg[1]) + '</label>');
+        var header = msg[0] + '-' + msg[1];
+        for (var i = 2; i < msg.length; i++)
+        {
+            targetDiv.append('<div class="checkbox"><label><input type="checkbox" value="'
+                + header + '-' + msg[i] + '"/>' + msg[i] + '</label></div>');
+        }
+
+        $('input[type="checkbox"]').click(function () {
+            onFilterClicked($(this));
+        });
+    }
+
+    var documentInit = function () {
+        // First of all, get the total data count
+        // Another ajax inside will grab the actual data
+        ajaxDataCount();
+        ajaxDistinctValues("type", "guitar");
+        ajaxDistinctValues("brand", "guitar");
+        ajaxDistinctValues("type", "amp");
+        ajaxDistinctValues("brand", "amp");
+        ajaxDistinctValues("type", "pedal");
+        ajaxDistinctValues("brand", "pedal");
+
+        for (var i = 1; i < 4; i++) {
+            $('#page-' + i).click(function () {
+                onPageClicked($(this));
+            });
+        }
+
+        $('input[type="checkbox"]').click(function () {
+            onFilterClicked($(this));
+        });
+
+        $("#guitar-filter-div").click(function () {
+            onCatFilterClicked($(this));
+        });
+
+        $("#amp-filter-div").click(function () {
+            onCatFilterClicked($(this));
+        });
+
+        $("#pedal-filter-div").click(function () {
+            onCatFilterClicked($(this));
+        });
+
+        $("#guitar-filter").hide();
+        $("#amp-filter").hide();
+        $("#pedal-filter").hide();
+
+        // Checkout event handling setup
         $("#total-price").append("$ " + totalPrice.toFixed(2));
 
         $("#checkout-button").prop('disabled', true);
@@ -402,38 +602,7 @@
         });
     }
 
-    function getExtraAttrib(obj) {
-        if (obj.category === "guitar")
-            return "strings:";
-        else if (obj.category === "pedal")
-            return " ";
-        else if (obj.category === "amp")
-            return "power:";
-    }
-
-    function getExtraValue(obj) {
-        if (obj.category === "guitar")
-            return obj.strings;
-        else if (obj.category === "pedal")
-            return " ";
-        else if (obj.category === "amp")
-            return obj.power;
-    }
-
     // Since the document is not instantly ready for manipulation, jQuery can detect that
     // and react accordingly with a user-provided callback in $(document).ready(--callback--)
     $(document).ready(documentInit);
-
-    // Pretty print regex for numbers which adds commas after every third digit
-    function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    // Closure for pagination
-    var pageClick = function (i) {
-        return function () {
-            ajaxService("GET", { page: i }, "GetProductList", onProductListSuccess);;
-        };
-    };
 })();
-
