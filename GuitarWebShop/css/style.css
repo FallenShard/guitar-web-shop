@@ -260,7 +260,6 @@
 
 .glyph-class {
     float: right;
-    /*margin-left: 45px;*/
     border: 3px solid white;
     border-radius: 4px;
     display: none;
@@ -271,13 +270,10 @@
     box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(255, 0, 0, .6);
 }
 
-/*.var-bd-div {
-    background-color: white;
-    color: #990000;
-    border-color: #990000;
-    border: 2px;
-    border-radius: 3px;
-}*/
+.form-group input[type=text]:focus {
+    border-color: red;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(255, 0, 0, .6);
+}
 
 .var-bd-div {
     background-color: #990000;

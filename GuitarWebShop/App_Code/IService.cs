@@ -26,12 +26,12 @@ public interface IService
     [OperationContract]
     [WebInvoke(Method         = "GET",
                ResponseFormat = WebMessageFormat.Json)]
-    string[] GetFilteredItems(int page, string categories, string filters, double minPrice, double maxPrice);
+    string[] GetFilteredItems(int page, string categories, string filters, double minPrice, double maxPrice, string tags);
 
     [OperationContract]
     [WebInvoke(Method         = "GET",
                ResponseFormat = WebMessageFormat.Json)]
-    long GetDataCount(string categories, string filters, double minPrice, double maxPrice);
+    long GetDataCount(string categories, string filters, double minPrice, double maxPrice, string tags);
 
     [OperationContract]
     [WebInvoke(Method         = "GET",
@@ -45,7 +45,6 @@ public interface IService
 
     [OperationContract]
     [WebInvoke(Method = "GET",
-    //            BodyStyle = WebMessageBodyStyle.Wrapped,
                ResponseFormat = WebMessageFormat.Json)]
     string AddItem(string category, string name, string type, string brand, double year, double price, double extra, string tags, string imageUrl, string brandLogoUrl);
 

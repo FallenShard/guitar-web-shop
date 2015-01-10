@@ -55,6 +55,17 @@
         <!-- Main div that represents the items and the side-bar -->
         <div id="content-div" class="row">
             <div id="side-bar-div" class="col-xs-2">
+                <div id="tags-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="tags">
+                    <label>Tag Search</label>
+                    <span class="glyphicon glyphicon-ok glyph-class"></span>
+                </div>
+                <div id="tags-filter" class="filter-div">
+                    <div class="form-group">
+                        <label for="tags-input">Type in any keywords separated by single commas</label>
+                        <input type="text" class="form-control" id="tags-input" />
+                    </div>
+                    <button id="tags-search-button" class="btn btn-block btn-skin">Search</button>
+                </div>
                 <div id="price-filter-div" class="cat-filter-div drops-shadow margin-vert-5" value="price">
                     <label>Price Range</label>
                     <span class="glyphicon glyphicon-ok glyph-class"></span>

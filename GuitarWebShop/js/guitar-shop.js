@@ -2,6 +2,7 @@
 // This idiom in JavaScript is known as IIFE (Immediately-invoked Function Expression)
 // It prevents pollution of global namespace by placing everything in an anonymous function and evaluates it immediately
 (function () {
+    var dataCount = 0;
     var itemsPerPage = 12;
     var totalPages = 0;
     var currentPage = 1;
@@ -16,9 +17,10 @@
     var modalFooter = null;
     var minFilterChain = [];
     var catFilterChain = [];
-    var dataCount = 0;
     var minPriceFilter = 0;
     var maxPriceFilter = 0;
+    var tagsFilter = "";
+    var adminMode = false;
 
     function resetFilters() {
         minFilterChain = [];
@@ -511,7 +513,8 @@
             categories: flattenFilter(catFilterChain),
             filters: flattenFilter(minFilterChain),
             minPrice: minPriceFilter,
-            maxPrice: maxPriceFilter
+            maxPrice: maxPriceFilter,
+            tags: tagsFilter
         };
 
         ajaxService("GET", data, "GetDataCount", onDataCountSuccess);
@@ -536,7 +539,8 @@
             categories: flattenFilter(catFilterChain),
             filters: flattenFilter(minFilterChain),
             minPrice: minPriceFilter,
-            maxPrice: maxPriceFilter
+            maxPrice: maxPriceFilter,
+            tags: tagsFilter
         };
         ajaxService("GET", data, "GetFilteredItems", onProductListSuccess);
     }
@@ -622,8 +626,16 @@
 
     function adjustPaginationHeader() {
         $("#page-counter").empty().append("Current page: " + currentPage + " of " + totalPages);
-        $("#data-counter").empty().append("Displaying results: " + ((currentPage - 1) * itemsPerPage + 1) +
+
+        if (dataCount === 0)
+        {
+            $("#data-counter").empty().append("No items match the selected filters.");
+        }
+        else
+        {
+            $("#data-counter").empty().append("Displaying results: " + ((currentPage - 1) * itemsPerPage + 1) +
             "-" + Math.min(currentPage * itemsPerPage, dataCount) + " of " + dataCount);
+        }
     }
 
     function ajaxDistinctValues(prop, cat) {
@@ -668,6 +680,29 @@
         $("#max-price-label").empty().append("Max Price ($ " + numberWithCommas(msg[1].toFixed(2)) + ")");
     }
 
+    function onTagsFilterClicked(target) {
+        var targetId = target.attr("id");
+        var divToChangeId = targetId.toString().slice(0, -4);
+        var divToChange = $("#" + divToChangeId);
+        divToChange.slideToggle("slow", function () {
+            var filterFromTarget = target.attr("value");
+            if (divToChange.is(":not(:visible)")) {
+                tagsFilter = "";
+            }
+            ajaxDataCount();
+        });
+
+        var span = target.children("span");
+        $(span).fadeToggle("slow");
+    }
+
+    function onTagsSearchClicked(target) {
+        var inputVal = $("#tags-input").val();
+        tagsFilter = inputVal.replace(/\s+/g, '');;
+
+        ajaxDataCount();
+    }
+
     function sideBarSetup() {
         resetFilters();
         ajaxDistinctValues("type", "guitar");
@@ -689,6 +724,10 @@
             onPriceSearchClicked($(this));
         });
 
+        $("#tags-search-button").click(function () {
+            onTagsSearchClicked($(this));
+        });
+
         for (var i = 1; i < 4; i++) {
             $('#page-' + i).click(function () {
                 onPageClicked($(this));
@@ -701,7 +740,11 @@
 
         $("#price-filter-div").click(function () {
             onPriceFilterClicked($(this));
-        })
+        });
+
+        $("#tags-filter-div").click(function () {
+            onTagsFilterClicked($(this));
+        });
 
         $(".filter-div").hide();
 
@@ -714,10 +757,15 @@
         });
 
         $("#site-logo").click(function () {
-            $('.cat-filter-div').animate({ backgroundColor: '#000099' });
-            $('#header-div').animate({ backgroundColor: '#000099' });
             $('.admin-tool').toggle("slow");
-            $('.var-bd-div').animate({ backgroundColor: '#000099'});
+            adminMode = !adminMode;
+            if (adminMode) {
+                $('#header-div').animate({ backgroundColor: '#000099' });
+            }
+            else {
+                $('#header-div').animate({ backgroundColor: '#990000' });
+            }
+
         });
 
         // Handle left arrow in pagination
@@ -767,11 +815,6 @@
         setupAddModal();
         $("#remove-modal-button").click(function () {
             setupRemoveModal();
-        });
-        
-
-        $("#btnSearch").click(function () {
-            alert($('.btn-select').text() + ", " + $('.btn-select2').text());
         });
     }
 

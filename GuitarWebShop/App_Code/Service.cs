@@ -48,7 +48,7 @@ public class Service : IService
         return string.Empty;
     }
 
-    public long GetDataCount(string categories, string filters, double minPrice, double maxPrice)
+    public long GetDataCount(string categories, string filters, double minPrice, double maxPrice, string tags)
     {
         // Specify connection string for mongo database
         var connectionString = "mongodb://localhost:27017/?safe=true";
@@ -61,15 +61,17 @@ public class Service : IService
         var db = server.GetDatabase("guitar_shop");
 
         var collection = db.GetCollection<BsonDocument>("items");
+        collection.CreateIndex(new string[]{"topics"});
 
         IList<IMongoQuery> queries = null;
         if (!categories.Equals("", StringComparison.Ordinal))
-            queries = buildQueries(categories, filters);
+            queries = BuildQueries(categories, filters);
 
-        var priceQuery = buildPriceQuery(minPrice, maxPrice);
+        var priceQuery = BuildPriceQuery(minPrice, maxPrice);
         var filterQuery = queries == null ? null : Query.Or(queries);
+        var tagQuery = BuildTagQuery(tags);
 
-        var finalQuery = mergeQueries(priceQuery, filterQuery);
+        var finalQuery = MergeQueries(priceQuery, filterQuery, tagQuery);
 
         if (finalQuery != null)
         {
@@ -79,7 +81,7 @@ public class Service : IService
             return collection.FindAll().Count();
     }
 
-    public string[] GetFilteredItems(int page, string categories, string filters, double minPrice, double maxPrice)
+    public string[] GetFilteredItems(int page, string categories, string filters, double minPrice, double maxPrice, string tags)
     {
         // Specify connection string for mongo database
         var connectionString = "mongodb://localhost:27017/?safe=true";
@@ -88,29 +90,28 @@ public class Service : IService
         var client = new MongoClient(connectionString);
         var server = client.GetServer();
 
-        // Fetch the database named guitar_shop
+        // Fetch the database named guitar_shop, and a collection named "items"
         var db = server.GetDatabase("guitar_shop");
-
-       
         var collection = db.GetCollection<BsonDocument>("items");
 
         IList<IMongoQuery> queries = null;
         if (!categories.Equals("", StringComparison.Ordinal))
-            queries = buildQueries(categories, filters);
+            queries = BuildQueries(categories, filters);
 
-        var priceQuery = buildPriceQuery(minPrice, maxPrice);
+        var priceQuery = BuildPriceQuery(minPrice, maxPrice);
         var filterQuery = queries == null ? null : Query.Or(queries);
+        var tagQuery = BuildTagQuery(tags);
 
-        var finalQuery = mergeQueries(priceQuery, filterQuery);
+        var finalQuery = MergeQueries(priceQuery, filterQuery, tagQuery);
 
         IEnumerable<BsonDocument> bsonData;
 
         if (finalQuery != null)
         {
-            bsonData = paginate(collection.Find(finalQuery).SetSortOrder(SortBy.Ascending("name")), page);
+            bsonData = Paginate(collection.Find(finalQuery).SetSortOrder(SortBy.Ascending("name")), page);
         }
         else
-            bsonData = paginate(collection.FindAll().SetSortOrder(SortBy.Ascending("name")), page);
+            bsonData = Paginate(collection.FindAll().SetSortOrder(SortBy.Ascending("name")), page);
 
         List<string> products = new List<string>();
 
@@ -123,9 +124,6 @@ public class Service : IService
 
         return products.ToArray();
     }
-
-    
-    
 
     public string[] GetDistinctValues(string property, string category)
     {
@@ -181,7 +179,7 @@ public class Service : IService
     }
 
     // This function takes a list of categories and filters and builds a query based on that
-    private IList<IMongoQuery> buildQueries(string categories, string filters)
+    private IList<IMongoQuery> BuildQueries(string categories, string filters)
     {
         // This list will hold all our queries
         IList<IMongoQuery> queries = new List<IMongoQuery>();
@@ -193,7 +191,7 @@ public class Service : IService
             queries.Add(Query.EQ("category", categs[i]));
         }
 
-        // Early exit for performance
+        // Early exit if there are no filters to process
         if (filters.Equals("", StringComparison.Ordinal))
             return queries;
 
@@ -241,7 +239,7 @@ public class Service : IService
         return queries;
     }
 
-    private IMongoQuery buildPriceQuery(double minPrice, double maxPrice)
+    private IMongoQuery BuildPriceQuery(double minPrice, double maxPrice)
     {
         IMongoQuery minQuery = null;
         IMongoQuery maxQuery = null;
@@ -258,16 +256,31 @@ public class Service : IService
         return Query.And(minQuery, maxQuery);
     }
 
-    private IMongoQuery mergeQueries(IMongoQuery priceQuery, IMongoQuery filterQuery)
+    private IMongoQuery MergeQueries(IMongoQuery priceQuery, IMongoQuery filterQuery, IMongoQuery tagQuery)
     {
         if (priceQuery == null)
-            return filterQuery;
-        if (filterQuery == null)
-            return priceQuery;
+        {
+            if (filterQuery == null)
+                return tagQuery;
+            if (tagQuery == null)
+                return filterQuery;
+            return Query.And(filterQuery, tagQuery);
+        }
 
-        return Query.And(priceQuery, filterQuery);
+        if (filterQuery == null)
+        {
+            if (tagQuery == null)
+                return priceQuery;
+            return Query.And(priceQuery, tagQuery);
+        }
+
+        if (tagQuery == null)
+            return Query.And(priceQuery, filterQuery);
+        else
+            return Query.And(priceQuery, filterQuery, tagQuery);
     }
-    private IEnumerable<BsonDocument> paginate(MongoCursor<BsonDocument> collection, int page)
+
+    private IEnumerable<BsonDocument> Paginate(MongoCursor<BsonDocument> collection, int page)
     {
         return collection.Skip(12 * (page - 1)).Take(12);
     }
@@ -283,7 +296,7 @@ public class Service : IService
         var query = Query.EQ("name", name);
 
         if (collection.Find(query).Count() > 0)
-            return "A item with that name already exists in your shop.";
+            return "An item with that name already exists in your shop.";
 
         var splitTags = tags.Split(',');
 
@@ -350,7 +363,7 @@ public class Service : IService
         //Example - A new pedal inserted successfully
     }
 
-    //Removes item with given ID from database if it is in database
+    // Removes item with given ID from database
     public string RemoveItem(string id)
     {
         var connectionString = "mongodb://localhost:27017/?safe=true";
@@ -361,8 +374,18 @@ public class Service : IService
 
         var query = Query.EQ("_id", new ObjectId(id));
 
-        WriteConcernResult res = collection.Remove(query);
+        collection.Remove(query);
 
         return id;
+    }
+
+    private IMongoQuery BuildTagQuery(string tags)
+    {
+        if (tags == "" || tags == null)
+            return null;
+
+        string[] tagArray = tags.Split(',');
+
+        return Query.All("tags", new BsonArray(tagArray));
     }
 }
