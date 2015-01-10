@@ -1,0 +1,469 @@
+use guitar_shop
+db.items.insert({"_id"          : 1
+                ,"category"     : "guitar"
+                ,"name"         : "1958 Gibson Les Paul Standard"
+                ,"type"         : "Electric"
+                ,"brand"        : "Gibson"
+                ,"year"         : 1958
+                ,"price"        : 4699.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "les paul", "gibson", "vintage"]
+                ,"imageUrl"     : "glps.png"
+                ,"brandLogoUrl" : "gibson.png"
+                });
+                
+db.items.insert({"_id"          : 2
+                ,"category"     : "guitar"
+                ,"name"         : "Epiphone Les Paul Special II"
+                ,"type"         : "Electric"
+                ,"brand"        : "Epiphone"
+                ,"year"         : 2001
+                ,"price"        : 169.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "epiphone", "les paul", "special", "practice"]
+                ,"imageUrl"     : "elpsII.png"
+                ,"brandLogoUrl" : "epiphone.png"
+                });
+                
+db.items.insert({"_id"          : 3
+                ,"category"     : "guitar"
+                ,"name"         : "Fender Eric Johnson Signature Stratocaster"
+                ,"type"         : "Electric"
+                ,"brand"        : "Fender"
+                ,"year"         : 2005
+                ,"price"        : 1899.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "eric", "johnson", "signature", "stratocaster", "fender"]
+                ,"imageUrl"     : "ejsStrat.png"
+                ,"brandLogoUrl" : "fender.png"
+                });
+                
+db.items.insert({"_id"          : 4
+                ,"category"     : "guitar"
+                ,"name"         : "Fender David Gilmour Signature Stratocaster"
+                ,"type"         : "Electric"
+                ,"brand"        : "Fender"
+                ,"year"         : 2006
+                ,"price"        : 5120.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "david", "gilmour", "signature", "stratocaster", "fender"]
+                ,"imageUrl"     : "dgsStrat.png"
+                ,"brandLogoUrl" : "fender.png"
+                });
+
+db.items.insert({"_id"          : 5
+                ,"category"     : "guitar"
+                ,"name"         : "Ibanez JS1200"
+                ,"type"         : "Electric"
+                ,"brand"        : "Ibanez"
+                ,"year"         : 2004
+                ,"price"        : 2199.99
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "red", "ibanez", "joe", "satriani", "floyd rose", "whammy"]
+                ,"imageUrl"     : "js1200.png"
+                ,"brandLogoUrl" : "ibanez.png"
+                });
+                
+db.items.insert({"_id"          : 6
+                ,"category"     : "guitar"
+                ,"name"         : "Schecter Hellraiser C-7"
+                ,"type"         : "Electric"
+                ,"brand"        : "Schecter"
+                ,"year"         : 1999
+                ,"price"        : 949.00
+                ,"strings"      : 7
+                ,"tags"         : ["electric", "Schecter", "hellraiser", "c7", "7 string"]
+                ,"imageUrl"     : "hellraiserc7.png"
+                ,"brandLogoUrl" : "schecter.png"
+                });
+
+db.items.insert({"_id"          : 7
+                ,"category"     : "guitar"
+                ,"name"         : "Fender CD-60"
+                ,"type"         : "Acoustic"
+                ,"brand"        : "Fender"
+                ,"year"         : 2006
+                ,"price"        : 140.00
+                ,"strings"      : 6
+                ,"tags"         : ["acoustic", "fender", "cd-60", "black"]
+                ,"imageUrl"     : "cd60.png"
+                ,"brandLogoUrl" : "fender.png"
+                });
+
+db.items.insert({"_id"          : 8
+                ,"category"     : "guitar"
+                ,"name"         : "Yamaha C40"
+                ,"type"         : "Classical"
+                ,"brand"        : "Yamaha"
+                ,"year"         : 2007
+                ,"price"        : 169.00
+                ,"strings"      : 6
+                ,"tags"         : ["classical", "yamaha", "c40", "black"]
+                ,"imageUrl"     : "c40.png"
+                ,"brandLogoUrl" : "yamaha.png"
+                });
+
+db.items.insert({"_id"          : 9
+                ,"category"     : "guitar"
+                ,"name"         : "Takamine GS330S"
+                ,"type"         : "Classical"
+                ,"brand"        : "Takamine"
+                ,"year"         : 2005
+                ,"price"        : 289.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "takamine", "classical", "gs330s"]
+                ,"imageUrl"     : "gs330s.png"
+                ,"brandLogoUrl" : "takamine.png"
+                });
+
+db.items.insert({"_id"          : 10
+                ,"category"     : "guitar"
+                ,"name"         : "Ibanez RG3550ZDX"
+                ,"type"         : "Electric"
+                ,"brand"        : "Ibanez"
+                ,"year"         : 1987
+                ,"price"        : 1499.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "black", "floyd rose", "rg3550zdx", "prestige", "ibanez"]
+                ,"imageUrl"     : "rg3550zdx.png"
+                ,"brandLogoUrl" : "ibanez.png"
+                });
+
+db.items.insert({"_id"          : 11
+                ,"category"     : "guitar"
+                ,"name"         : "Gibson Firebird V"
+                ,"type"         : "Electric"
+                ,"brand"        : "Gibson"
+                ,"year"         : 2008
+                ,"price"        : 1790.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "firebird", "classic", "gibson", "reissue"]
+                ,"imageUrl"     : "firebirdv.png"
+                ,"brandLogoUrl" : "gibson.png"
+                });
+
+db.items.insert({"_id"          : 12
+                ,"category"     : "guitar"
+                ,"name"         : "Squier Telecaster"
+                ,"type"         : "Electric"
+                ,"brand"        : "Squier"
+                ,"year"         : 1983
+                ,"price"        : 149.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "telecaster", "squier", "2005"]
+                ,"imageUrl"     : "squiertele.png"
+                ,"brandLogoUrl" : "squier.png"
+                });
+                
+db.items.insert({"_id"          : 13
+                ,"category"     : "guitar"
+                ,"name"         : "Fender Stratocaster"
+                ,"type"         : "Electric"
+                ,"brand"        : "Fender"
+                ,"year"         : 1956
+                ,"price"        : 2799.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "stratocaster", "fender", "vintage"]
+                ,"imageUrl"     : "strat.png"
+                ,"brandLogoUrl" : "fender.png"
+                });
+
+db.items.insert({"_id"          : 14
+                ,"category"     : "guitar"
+                ,"name"         : "Gibson USA Explorer"
+                ,"type"         : "Electric"
+                ,"brand"        : "Gibson"
+                ,"year"         : 1958
+                ,"price"        : 1140.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "explorer", "gibson", "vintage", "1958"]
+                ,"imageUrl"     : "explorer.png"
+                ,"brandLogoUrl" : "gibson.png"
+                });
+
+db.items.insert({"_id"          : 15
+                ,"category"     : "guitar"
+                ,"name"         : "Ibanez Iceman IC500"
+                ,"type"         : "Electric"
+                ,"brand"        : "Ibanez"
+                ,"year"         : 2008
+                ,"price"        : 650.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "iceman", "ibanez", "ic500", "white"]
+                ,"imageUrl"     : "icemanic500.png"
+                ,"brandLogoUrl" : "ibanez.png"
+                });
+
+db.items.insert({"_id"          : 16
+                ,"category"     : "guitar"
+                ,"name"         : "ESP LTD Viper-1000"
+                ,"type"         : "Electric"
+                ,"brand"        : "ESP"
+                ,"year"         : 2002
+                ,"price"        : 799.00
+                ,"strings"      : 6
+                ,"tags"         : ["electric", "viper", "ltd", "esp", "black"]
+                ,"imageUrl"     : "viper1000.png"
+                ,"brandLogoUrl" : "esp.png"
+                });
+                
+db.items.insert({"_id"          : 2001
+                ,"category"     : "pedal"
+                ,"name"         : "Boss DD-3 Digital Delay"
+                ,"type"         : "Delay"
+                ,"brand"        : "Boss"
+                ,"year"         : "1986"
+                ,"price"        : 129.00
+                ,"tags"         : ["boss", "digital", "delay", "pedal", "dd3"]
+                ,"imageUrl"     : "bossdd3.png"
+                ,"brandLogoUrl" : "boss.png"
+                });
+db.items.insert({"_id"          : 2002
+                ,"category"     : "pedal"
+                ,"name"         : "DigiTech Whammy V"
+                ,"type"         : "Whammy"
+                ,"brand"        : "DigiTech"
+                ,"year"         : 2011
+                ,"price"        : 199.95
+                ,"tags"         : ["digitech", "whammy", "pedal", "reissue"]
+                ,"imageUrl"     : "whammyV.png"
+                ,"brandLogoUrl" : "digitech.png"
+                });
+
+db.items.insert({"_id"          : 2003
+                ,"category"     : "pedal"
+                ,"name"         : "Boss DS-2 Turbo Distortion"
+                ,"type"         : "Distortion"
+                ,"brand"        : "Boss"
+                ,"year"         : 1992
+                ,"price"        : 74.95
+                ,"tags"         : ["boss", "turbo", "distortion", "pedal", "ds2"]
+                ,"imageUrl"     : "bossds2.png"
+                ,"brandLogoUrl" : "boss.png"
+                });
+
+db.items.insert({"_id"          : 2004
+                ,"category"     : "pedal"
+                ,"name"         : "Dunlop CryBaby 535Q"
+                ,"type"         : "Wah"
+                ,"brand"        : "Dunlop"
+                ,"year"         : 2004
+                ,"price"        : 149.99
+                ,"tags"         : ["dunlop", "wah", "pedal", "cryBaby", "535q"]
+                ,"imageUrl"     : "crybaby535q.png"
+                ,"brandLogoUrl" : "dunlop.png"
+                });
+
+db.items.insert({"_id"          : 2005
+                ,"category"     : "pedal"
+                ,"name"         : "Boss DD-7 Digital Delay"
+                ,"type"         : "Delay"
+                ,"brand"        : "Boss"
+                ,"year"         : 2008
+                ,"price"        : 149.00
+                ,"tags"         : ["boss", "digital", "delay", "pedal", "dd7"]
+                ,"imageUrl"     : "bossdd7.png"
+                ,"brandLogoUrl" : "boss.png"
+                });
+
+db.items.insert({"_id"          : 2006
+                ,"category"     : "pedal"
+                ,"name"         : "Boss BD-2 Blues Driver"
+                ,"type"         : "Overdrive"
+                ,"brand"        : "Boss"
+                ,"year"         : 2006
+                ,"price"        : 95.95
+                ,"tags"         : ["boss", "blues", "driver", "distortion", "overdrive", "pedal", "bd2"]
+                ,"imageUrl"     : "bossbd2.png"
+                ,"brandLogoUrl" : "boss.png"
+                });
+
+db.items.insert({"_id"          : 2007
+                ,"category"     : "pedal"
+                ,"name"         : "Boss RV-5 Digital Reverb"
+                ,"type"         : "Reverb"
+                ,"brand"        : "Boss"
+                ,"year"         : 2004
+                ,"price"        : 155.95
+                ,"tags"         : ["boss", "digital", "reverb", "pedal", "rv5"]
+                ,"imageUrl"     : "bossrv5.png"
+                ,"brandLogoUrl" : "boss.png"
+                });
+
+db.items.insert({"_id"          : 2008
+                ,"category"     : "pedal"
+                ,"name"         : "Electroharmonix Big Muff Pi"
+                ,"type"         : "Fuzz"
+                ,"brand"        : "Electroharmonix"
+                ,"year"         : 2005
+                ,"price"        : 79.95
+                ,"tags"         : ["electroharmonix", "fuzz", "distortion", "pedal", "big", "muff", "pi"]
+                ,"imageUrl"     : "bigmuffpi.png"
+                ,"brandLogoUrl" : "electroharmonix.png"
+                });
+
+db.items.insert({"_id"          : 2009
+                ,"category"     : "pedal"
+                ,"name"         : "Boss CH-1 Super Chorus"
+                ,"type"         : "Chorus"
+                ,"brand"        : "Boss"
+                ,"year"         : 2008
+                ,"price"        : 89.95
+                ,"tags"         : ["boss", "super", "chorus", "pedal", "ch1"]
+                ,"imageUrl"     : "bossch1.png"
+                ,"brandLogoUrl" : "boss.png"
+                });
+
+db.items.insert({"_id"          : 2010
+                ,"category"     : "pedal"
+                ,"name"         : "Boss BF-3 Flanger"
+                ,"type"         : "Flanger"
+                ,"brand"        : "Boss"
+                ,"year"         : 2011
+                ,"price"        : 134.95
+                ,"tags"         : ["boss", "flanger", "pedal", "bf3"]
+                ,"imageUrl"     : "bossbf3.png"
+                ,"brandLogoUrl" : "boss.png"
+                });
+
+db.items.insert({"_id"          : 2011
+                ,"category"     : "pedal"
+                ,"name"         : "Ibanez TS9 Tube Screamer"
+                ,"type"         : "Distortion"
+                ,"brand"        : "Ibanez"
+                ,"year"         : 2002
+                ,"price"        : 199.95
+                ,"tags"         : ["ibanez", "distortion", "pedal", "tube", "screamer", "ts9"]
+                ,"imageUrl"     : "tubescreamerts9.png"
+                ,"brandLogoUrl" : "ibanez.png"
+                });
+
+db.items.insert({"_id"          : 1001
+                ,"category"     : "amp"
+                ,"name"         : "Roland Cube-15X"
+                ,"type"         : "Solid State"
+                ,"brand"        : "Roland"
+                ,"year"         : 2005
+                ,"price"        : 119.00
+                ,"power"        : 15
+                ,"tags"         : ["roland", "cube", "solidstate", "practice", "amp", "15w"]
+                ,"imageUrl"     : "cube15x.png"
+                ,"brandLogoUrl" : "roland.png"
+                });
+
+db.items.insert({"_id"          : 1002
+                ,"category"     : "amp"
+                ,"name"         : "Vox AC30"
+                ,"type"         : "Tube"
+                ,"brand"        : "Vox"
+                ,"year"         : 2004
+                ,"price"        : 999.99
+                ,"power"        : 30
+                ,"tags"         : ["vox", "ac30", "valve", "tube", "combo", "amp", "30w"]
+                ,"imageUrl"     : "ac30.png"
+                ,"brandLogoUrl" : "vox.png"
+                });
+
+db.items.insert({"_id"          : 1003
+                ,"category"     : "amp"
+                ,"name"         : "Vox Valvetronix VT80+"
+                ,"type"         : "Hybrid"
+                ,"brand"        : "Vox"
+                ,"year"         : 2004
+                ,"price"        : 349.99
+                ,"power"        : 80
+                ,"tags"         : ["vox", "vt80+", "valvetronix", "hybrid", "amp", "80w"]
+                ,"imageUrl"     : "vt80p.png"
+                ,"brandLogoUrl" : "vox.png"
+                });
+
+db.items.insert({"_id"          : 1004
+                ,"category"     : "amp"
+                ,"name"         : "Peavey Vypyr 15"
+                ,"type"         : "Solid State"
+                ,"brand"        : "Peavey"
+                ,"year"         : 2008
+                ,"price"        : 99.99
+                ,"power"        : 15
+                ,"tags"         : ["peavey", "vypyr", "practice", "solidstate", "amp", "15w"]
+                ,"imageUrl"     : "vypyr15.png"
+                ,"brandLogoUrl" : "peavey.png"
+                });
+
+db.items.insert({"_id"          : 1005
+                ,"category"     : "amp"
+                ,"name"         : "Orange Rockerverb 50 MKII"
+                ,"type"         : "Tube"
+                ,"brand"        : "Orange"
+                ,"year"         : 2010
+                ,"price"        : 1659.99
+                ,"power"        : 50
+                ,"tags"         : ["orange", "rockerverb", "valve", "mkii", "head", "tube", "amp", "50w"]
+                ,"imageUrl"     : "orange50mk2.png"
+                ,"brandLogoUrl" : "orange.png"
+                });
+
+db.items.insert({"_id"          : 1006
+                ,"category"     : "amp"
+                ,"name"         : "Fender 65 Twin Reverb"
+                ,"type"         : "Tube"
+                ,"brand"        : "Fender"
+                ,"year"         : 1965
+                ,"price"        : 1099.99
+                ,"power"        : 85
+                ,"tags"         : ["fender", "twin", "valve", "reverb", "tube", "amp", "85w"]
+                ,"imageUrl"     : "twin65.png"
+                ,"brandLogoUrl" : "fender.png"
+                });
+
+db.items.insert({"_id"          : 1007
+                ,"category"     : "amp"
+                ,"name"         : "Marshall JVM410H"
+                ,"type"         : "Tube"
+                ,"brand"        : "Marshall"
+                ,"year"         : 2010
+                ,"price"        : 2399.99
+                ,"power"        : 100
+                ,"tags"         : ["marshall", "head", "valve", "jvm410", "tube", "amp", "100w"]
+                ,"imageUrl"     : "jvm410.png"
+                ,"brandLogoUrl" : "marshall.png"
+                });
+
+db.items.insert({"_id"          : 1008
+                ,"category"     : "amp"
+                ,"name"         : "Peavey 6505+ Combo"
+                ,"type"         : "Hybrid"
+                ,"brand"        : "Peavey"
+                ,"year"         : 2007
+                ,"price"        : 999.99
+                ,"power"        : 60
+                ,"tags"         : ["peavey", "6505", "combo", "hybrid", "amp", "60w"]
+                ,"imageUrl"     : "6505p.png"
+                ,"brandLogoUrl" : "peavey.png"
+                });
+
+db.items.insert({"_id"          : 1009
+                ,"category"     : "amp"
+                ,"name"         : "Line 6 Spider IV 75"
+                ,"type"         : "Solid State"
+                ,"brand"        : "Line 6"
+                ,"year"         : 2006
+                ,"price"        : 299.99
+                ,"power"        : 75
+                ,"tags"         : ["line6", "spider", "solidstate", "amp", "75"]
+                ,"imageUrl"     : "spider475.png"
+                ,"brandLogoUrl" : "line6.png"
+                });
+                
+db.items.insert({"_id"          : 1010
+                ,"category"     : "amp"
+                ,"name"         : "Mesa Boogie Mark V"
+                ,"type"         : "Tube"
+                ,"brand"        : "Mesa Boogie"
+                ,"year"         : 2006
+                ,"price"        : 2249.00
+                ,"power"        : 90
+                ,"tags"         : ["mesa", "boogie", "valve", "mark", "V", "5", "tube", "amp", "90w"]
+                ,"imageUrl"     : "mesamarkv.png"
+                ,"brandLogoUrl" : "mesaboogie.png"
+                });                

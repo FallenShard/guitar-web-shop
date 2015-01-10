@@ -1,0 +1,1 @@
+cat initial_data.txt | mongo
