@@ -28,13 +28,15 @@ public class Service : IService
         var db = server.GetDatabase("guitar_shop");
 
         var collection = db.GetCollection<BsonDocument>("items");
-        var bsons = collection.FindAll().SetSortOrder(SortBy.Ascending("name")).Skip(12 * (page - 1)).Take(12);
+        var bsonData = collection.FindAll().SetSortOrder(SortBy.Ascending("category"));
 
         List<string> products = new List<string>();
 
-        foreach (BsonDocument doc in bsons)
+        var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+        foreach (BsonDocument doc in bsonData)
         {
-            products.Add(doc.ToJson());
+            doc["_id"] = doc["_id"].ToString();
+            products.Add(doc.ToJson(jsonWriterSettings));
         }
 
         return products.ToArray();
@@ -119,11 +121,6 @@ public class Service : IService
             products.Add(doc.ToJson(jsonWriterSettings));
         }
 
-        //foreach (string prod in products)
-        //{
-        //    prod.
-        //}
-        
         return products.ToArray();
     }
 
@@ -141,7 +138,6 @@ public class Service : IService
 
         // Fetch the database named guitar_shop
         var db = server.GetDatabase("guitar_shop");
-
 
         var collection = db.GetCollection<BsonDocument>("items");
 
@@ -190,7 +186,7 @@ public class Service : IService
         // This list will hold all our queries
         IList<IMongoQuery> queries = new List<IMongoQuery>();
 
-        // First, deserialze categories and build a query from them
+        // First, deserialize categories and build a query from them
         string[] categs = categories.Split('|');
         for (int i = 0; i < categs.Length; i++)
         {
@@ -352,5 +348,21 @@ public class Service : IService
 
         return "A new " + category + " inserted successfully";
         //Example - A new pedal inserted successfully
+    }
+
+    //Removes item with given ID from database if it is in database
+    public string RemoveItem(string id)
+    {
+        var connectionString = "mongodb://localhost:27017/?safe=true";
+        var client = new MongoClient(connectionString);
+        var server = client.GetServer();
+        var db = server.GetDatabase("guitar_shop");
+        var collection = db.GetCollection<BsonDocument>("items");
+
+        var query = Query.EQ("_id", new ObjectId(id));
+
+        WriteConcernResult res = collection.Remove(query);
+
+        return id;
     }
 }

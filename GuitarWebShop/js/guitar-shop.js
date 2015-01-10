@@ -20,6 +20,16 @@
     var minPriceFilter = 0;
     var maxPriceFilter = 0;
 
+    function resetFilters() {
+        minFilterChain = [];
+        catFilterChain = [];
+        minPriceFilter = 0;
+        maxPriceFilter = 0;
+
+        $(".filter-div").hide();
+        $(".cat-filter-div").children("span").fadeOut();
+    }
+
     // Pretty print regex for numbers which adds commas after every third digit
     function numberWithCommas(x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -55,7 +65,9 @@
     function removeFromFilters(filterChain, filter)
     {
         var index = filterChain.indexOf(filter);
-        filterChain.splice(index, 1);
+
+        if (index !== -1)
+            filterChain.splice(index, 1);
     }
 
     function flattenFilter(filterChain)
@@ -184,9 +196,12 @@
             index++;
         }
 
-        totalPrice -= jsonCart[index].price * jsonCartQty[index];
-        jsonCart.splice(index, 1);
-        jsonCartQty.splice(index, 1);
+        if (index < jsonCart.length)
+        {
+            totalPrice -= jsonCart[index].price * jsonCartQty[index];
+            jsonCart.splice(index, 1);
+            jsonCartQty.splice(index, 1);
+        }
     }
 
     function buildCartRowView(cartIndex) {
@@ -403,7 +418,7 @@
             catch (exception)
             {
                 alert("JSON Parsing exception!");
-                return;
+                continue;
             }
 
             // On every Nth (4th here) item, create a row-fluid div and add to itemList
@@ -445,7 +460,6 @@
         else if (target.is(":not(:checked)"))
             removeFromFilters(minFilterChain, filter);
 
-        console.log(minFilterChain);
         ajaxDataCount();
     }
 
@@ -456,9 +470,13 @@
         divToChange.toggle("slow", function () {
             var filterFromTarget = target.attr("value");
             if (divToChange.is(":visible"))
+            {
                 addToFilters(catFilterChain, filterFromTarget);
+            }
             else
+            {
                 removeFromFilters(catFilterChain, filterFromTarget);
+            }
 
             ajaxDataCount();
         });
@@ -495,6 +513,7 @@
             minPrice: minPriceFilter,
             maxPrice: maxPriceFilter
         };
+
         ajaxService("GET", data, "GetDataCount", onDataCountSuccess);
     }
 
@@ -603,7 +622,8 @@
 
     function adjustPaginationHeader() {
         $("#page-counter").empty().append("Current page: " + currentPage + " of " + totalPages);
-        $("#data-counter").empty().append("Displaying results: " + Math.min(currentPage * itemsPerPage, dataCount) + " of " + dataCount);
+        $("#data-counter").empty().append("Displaying results: " + ((currentPage - 1) * itemsPerPage + 1) +
+            "-" + Math.min(currentPage * itemsPerPage, dataCount) + " of " + dataCount);
     }
 
     function ajaxDistinctValues(prop, cat) {
@@ -649,21 +669,21 @@
     }
 
     function sideBarSetup() {
+        resetFilters();
         ajaxDistinctValues("type", "guitar");
         ajaxDistinctValues("brand", "guitar");
         ajaxDistinctValues("type", "amp");
         ajaxDistinctValues("brand", "amp");
         ajaxDistinctValues("type", "pedal");
         ajaxDistinctValues("brand", "pedal");
+        ajaxPropertyRange("price");
     }
 
     var documentInit = function () {
         // First of all, get the total data count
         // Another ajax inside will grab the actual data
-        ajaxDataCount();
         sideBarSetup();
-
-        ajaxPropertyRange("price");
+        ajaxDataCount();
 
         $("#price-search-button").click(function () {
             onPriceSearchClicked($(this));
@@ -745,6 +765,10 @@
         })
 
         setupAddModal();
+        $("#remove-modal-button").click(function () {
+            setupRemoveModal();
+        });
+        
 
         $("#btnSearch").click(function () {
             alert($('.btn-select').text() + ", " + $('.btn-select2').text());
@@ -757,7 +781,6 @@
             var comboBox = $(this).parents('.dropdown').find('.dropdown-toggle');
             comboBox.empty().append(selText + ' <span class="caret"></span>');
             comboBox.attr("value", $(this).attr("value"));
-            console.log($(this).attr("value"));
 
             if (selText === "Guitar")
             {
@@ -791,13 +814,78 @@
             item.imageUrl = $("#image-url-input").val();
             item.brandLogoUrl = $("#brand-url-input").val();
 
-            console.log(item);
             ajaxService("GET", item, "AddItem", onAdditionSuccess);
         });
     }
 
     function onAdditionSuccess(msg) {
         // Refresh the page with newly added item
+        sideBarSetup();
+        ajaxDataCount();
+    }
+
+    function setupRemoveModal() {
+        ajaxService("GET", { page: 0 }, "GetProductList", onRemoveModalSuccess);
+    }
+
+    function onRemoveModalSuccess(items) {
+        $("#modal-remove-body").empty();
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < items.length; i++) {
+            // Attempt JSON parse, equivalent to eval
+            try {
+                var item = JSON.parse(items[i]);;
+            }
+            catch (exception) {
+                alert("JSON Parsing exception!");
+                continue;
+            }
+
+            var itemRow = document.createElement("div");
+            var idColumn = document.createElement("div");
+            var nameColumn = document.createElement("div");
+            var removeBtnColumn = document.createElement("div");
+
+            $(itemRow).attr("class", "row");
+            $(idColumn).attr("class", "col-xs-4");
+            $(nameColumn).attr("class", "col-xs-6");
+            $(removeBtnColumn).attr("class", "col-xs-2");
+
+            $(idColumn).append(item._id);
+            $(nameColumn).append(item.name);
+
+            var removeBtn = document.createElement("button");
+            $(removeBtn).attr("value", item._id);
+            $(removeBtn).attr("class", "btn btn-block btn-skin remove-item-btn");
+            $(removeBtn).append("Delete");
+            $(removeBtnColumn).append(removeBtn);
+
+            $(itemRow).append(idColumn);
+            $(itemRow).append(nameColumn);
+            $(itemRow).append(removeBtnColumn);
+
+            fragment.appendChild(itemRow);
+        }
+
+        var modalRemove = document.getElementById("modal-remove-body");
+        modalRemove.appendChild(fragment);
+
+        $(".remove-item-btn").click(function () {
+            var theButton = $(this);
+            var itemId = theButton.attr("value");
+            var rowParent = theButton.parents(".row");
+
+            ajaxService("GET", { id: itemId }, "RemoveItem", onRemoveItemSuccess);
+            rowParent.remove();
+        });
+    }
+
+    function onRemoveItemSuccess(itemId) {
+        removeFromCart(itemId);
+        $("#cart-row-" + itemId).remove();
+        $("#total-price").empty().append("$ " + numberWithCommas(totalPrice.toFixed(2)));
+
+        sideBarSetup();
         ajaxDataCount();
     }
 
